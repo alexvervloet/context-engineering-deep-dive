@@ -200,7 +200,29 @@ an agent's context.
 
 ---
 
-## 10. The capstone: `chat.py`
+## 10. The hidden cost: compaction breaks your prompt cache
+
+```bash
+python examples/09_caching_vs_compaction.py        # offline
+```
+
+Every technique so far shrinks the window. This one shows the bill they can quietly
+*raise*. Providers cache the prompt **prefix**, and the rule is unforgiving: any
+change anywhere in the prefix invalidates everything after it. An **append-only**
+history never touches its prefix — so every prior token is a cheap cache *read*
+(~0.1×) and only the new turn is written (~1.25×). **Compaction rewrites the
+prefix**: it changes the system prompt (the summary) and drops old turns, so the
+next request is a cache *miss* that pays full write price on the whole context.
+The example bills the same conversation both ways ([context/cost.py](context/cost.py))
+and finds compaction costing **~1.5×** as much here — fewer tokens, bigger bill.
+It's the honest tradeoff this series insists on: "cheaper context" and "cheaper
+bill" are different axes. (The crossover: on *very* long chats the unbounded
+append-only window finally loses — so when you must compact, do it rarely and in
+bulk, paying the cache miss once, not every turn.)
+
+---
+
+## 11. The capstone: `chat.py`
 
 Everything assembled into a chat you'd actually use: it stays inside a token budget
 no matter how long you talk (compaction), **and** remembers durable facts across
@@ -268,6 +290,7 @@ live path:
 | Recall is keyword overlap | Embedding similarity + reranking, and a relevance threshold so junk isn't injected |
 | Facts are trusted and never expire | **Eviction, contradiction resolution, and provenance** on stored memory |
 | A summary might silently drop a needed fact | An **eval gate** on memory quality, so a compaction regression fails the build |
+| Compaction/pruning run on every overflow (§10) | **Cache-aware memory**: keep the prefix stable, compact rarely and in bulk, and watch `cache_read_input_tokens` vs `cache_creation_input_tokens` so shrinking the window doesn't grow the bill |
 | Stored memory is trusted text | **Guardrails** — memory is untrusted input and a classic indirect-injection vector |
 
 The general ops machinery — observability, cost, reliability, caching, guardrails,
@@ -286,6 +309,7 @@ EXERCISES.md                ← predict-then-run prompts, one per section
 context/                    ← the from-scratch library (read it!)
   providers.py              ← the ONLY provider file: mock (default) + openai + claude
   tokens.py                 ← estimate the token budget (offline heuristic)
+  cost.py                   ← a tiny prompt-cache cost model (read vs write vs miss)
   memory.py                 ← Full / Window / Summary (compaction) conversation memory
   longterm.py               ← persistent cross-session memory with retrieval
   assemble.py               ← fit & order sections under a token budget
@@ -300,6 +324,7 @@ examples/
   06_assemble_budget.py     ← prioritize, then pack the window (offline)
   07_context_rot.py         ← more context is not better
   08_pruning_observations.py← trim stale tool results in an agent loop (offline)
+  09_caching_vs_compaction.py← compaction blows the prompt cache — fewer tokens, bigger bill (offline)
 ```
 
 (`.ctx_memory.json` is created by the capstone's long-term memory and is git-ignored.)
@@ -349,6 +374,8 @@ builds naturally:
 - [Fine-tuning](https://github.com/Ailuue/fine-tuning-deep-dive) — teach a model new behavior by example
 - [MCP](https://github.com/Ailuue/mcp-deep-dive) — serve tools, data & prompts to any LLM over a standard protocol
 - [Local Models](https://github.com/Ailuue/local-models-deep-dive) — run open-weight models on your own machine
+- [Agent Harnesses](https://github.com/Ailuue/agent-harness-deep-dive) — build on the loop: hooks, permissions, sandboxing, subagents
+- [Realtime Voice](https://github.com/Ailuue/realtime-voice-deep-dive) — low-latency speech-to-speech agents
 
 **Context Engineering is a bonus dive in the series.** It slots most naturally after
 [Agents](https://github.com/Ailuue/agents-deep-dive) (#6) — whose stateless "resend

@@ -158,6 +158,37 @@ token cut with the train of thought intact.
 
 ---
 
+## Section 10 — Caching vs. compaction **(offline)**
+
+**Predict (`09`).** Compaction keeps the window far *smaller* every turn than an
+append-only history. So it must cost less to run — right?
+
+<details><summary>▸ Answer</summary>
+
+Not necessarily — here it costs about **1.5× more**. Providers cache the prompt
+*prefix*, and any change to the prefix invalidates everything after it. Append-only
+never changes its prefix, so almost every token is a cheap cache *read* (~0.1×).
+Compaction rewrites the system prompt (the summary) and drops old turns — a prefix
+change — so those turns are cache *misses* billed at full write price (~1.25×) on the
+whole context. Fewer tokens, bigger bill.
+</details>
+
+**Recall.** If compaction can raise the bill, why compact at all — and how do you get
+its benefit without the cache penalty?
+
+<details><summary>▸ Answer</summary>
+
+You still need it eventually: an append-only window grows without bound, so on a
+*very long* conversation its cheap-but-huge reads finally cost more than a small
+uncached context. The two axes ("fewer tokens" vs "cheaper bill") cross over. The fix
+is cadence: compact **rarely and in bulk** so you pay the cache miss once instead of
+every turn, keep the stable part of the prefix byte-identical, and watch
+`cache_read_input_tokens` vs `cache_creation_input_tokens` to see which regime you're
+in.
+</details>
+
+---
+
 ## Capstone — `chat.py`
 
 **Do.** Run `python hands_on/chat.py "Hi, my name is Dana. Remember our launch is

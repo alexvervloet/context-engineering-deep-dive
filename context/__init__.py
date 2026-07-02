@@ -8,11 +8,12 @@ Everything else is provider-neutral logic about *what goes in the window*:
   - assemble.py  — fit & order sections under a token budget
 """
 
-from . import assemble, longterm, memory, tokens
+from . import assemble, cost, longterm, memory, tokens
 from .providers import describe, ensure_ready, generate, provider_name, summarize
 
 __all__ = [
     "tokens",
+    "cost",
     "memory",
     "longterm",
     "assemble",

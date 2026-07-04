@@ -130,15 +130,17 @@ giant low-priority doc must never crowd out a small essential one.
 ## Section 8 — Context rot **(mock)**
 
 **Predict, then run.** `examples/07_context_rot.py` answers the same question with a
-lean context and a bloated one. The mock gets it right both times — so what's the
-measured cost of the bloat, and what cost can't the mock show you?
+lean context and a bloated one — where the bloat includes a distractor naming a
+*different* person. What are the TWO costs the bloated window pays?
 
 <details><summary>▸ Answer</summary>
 
-The bloated window costs ~10× the tokens (so ~10× the spend and more latency) for
-the identical answer — on *every* turn. What the mock can't show is the quality
-cost: on a real model, padding dilutes the signal and invites it to latch onto an
-irrelevant passage. Relevance beats volume.
+Both halves of context rot. **Tokens:** the bloated window costs ~10× the tokens (so
+~10× the spend and more latency), on *every* turn. **Quality:** it returns the WRONG
+name — the buried distractor won. On the mock that flip is deterministic (it takes
+the last "my name is …" it sees); on a real model the same rot is subtler — padding
+dilutes the signal and pulls attention to a plausible irrelevant passage. Relevance
+beats volume.
 </details>
 
 ---

@@ -121,8 +121,8 @@ def check_keys(env, provider):
     for name, prefix, placeholder in PROVIDER_KEYS.get(provider, []):
         value = _get(env, name)
         if not value or value == placeholder:
-            fail(f"{name} is not set (still the placeholder).")
-            print("    Open .env and paste your real key — or set PROVIDER=mock to run offline.")
+            fail(f"{name} is not set.")
+            print("    Store it in your keychain + run under `secrun` (see SECRETS.md) — or set PROVIDER=mock to run offline.")
             all_ok = False
         elif prefix and not value.startswith(prefix):
             warn(f"{name} is set but doesn't start with '{prefix}'. Double-check it.")

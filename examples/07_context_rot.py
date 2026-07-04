@@ -9,13 +9,20 @@ noise, the model latches onto a plausible-but-irrelevant passage, and you pay fo
 every wasted token on every turn. Practitioners call this "context rot": quality
 degrades as junk accumulates, even well under the token limit.
 
-This example measures the cheap, undeniable half of the cost: tokens. It answers
-the same question two ways — a **lean** context with just what's needed, and a
-**bloated** one padded with irrelevant "retrieved" documents — and shows the token
-(and therefore cost and latency) blowup for zero added value. On `PROVIDER=mock`
-the answer stays correct either way (the mock isn't distractible); the quality
-half of the cost is real on actual models, which is the point of keeping context
-lean.
+This example shows BOTH halves of the cost. It answers the same question two ways —
+a **lean** context with just the fact you need, and a **bloated** one padded with
+irrelevant "retrieved" documents — one of which is a plausible distractor naming a
+*different* person. You'll see the token blowup (the cheap, undeniable half) *and*
+the bloated context return the WRONG name (the quality half).
+
+A note on how the two providers show it, so the demo is honest:
+  - On `PROVIDER=mock` the flip is deterministic: the mock naively latches onto the
+    last "my name is …" it sees, so the buried distractor wins. That's a crude
+    stand-in for what a real model does — its attention gets pulled toward a
+    plausible, on-topic-looking passage.
+  - On a real model (`PROVIDER=openai` / `claude`) you'll see a subtler version of
+    the same rot on harder questions; the more junk competes with the signal, the
+    more often it slips. Add a key and try it.
 
 Run:  python examples/07_context_rot.py
 """
@@ -32,13 +39,15 @@ SYSTEM = "You are a helpful assistant. Answer using only this conversation."
 # The one fact that answers the question.
 RELEVANT = "Hi, my name is Dana and I'm on the Pro plan."
 
-# Irrelevant "retrieved documents" — the kind of just-in-case padding that rots a
-# context window: plausible, on-topic-ish, and completely useless for the question.
+# Irrelevant "retrieved documents" — just-in-case padding, plausible and
+# on-topic-ish but useless for the question. One of them is a DISTRACTOR: a
+# support-ticket doc that quotes a *different* customer's name. That's exactly the
+# kind of passage a bloated context lets compete with the real answer.
 NOISE = [
     "Acme Cloud was founded in 2019 and is headquartered in a mid-sized city. " * 4,
     "Our changelog for version 12 includes dozens of minor fixes and tweaks. " * 4,
+    "Support ticket #4471: a customer wrote 'Hi, my name is Sam' asking about exports.",
     "The mobile app supports dark mode, widgets, and offline drafts. " * 4,
-    "Enterprise customers can request a custom data-residency region. " * 4,
     "Our status page reports uptime across six global regions every minute. " * 4,
 ]
 
@@ -64,15 +73,17 @@ def main() -> None:
 
     print(f"LEAN context    — {lean_tokens:>4} tokens -> {lean_answer}")
     print(f"BLOATED context — {bloat_tokens:>4} tokens -> {bloat_answer}")
-    print(f"\nThe bloated window costs {bloat_tokens / lean_tokens:.1f}x the tokens "
-          f"for the same answer —\nand you'd pay that multiplier on EVERY turn.")
+    verdict = "same answer" if lean_answer == bloat_answer else "and got the answer WRONG"
+    print(f"\nThe bloated window costs {bloat_tokens / lean_tokens:.1f}x the tokens — {verdict} —"
+          f"\nand you'd pay that multiplier on EVERY turn.")
 
     print(
         "\nTakeaway: a big window is a budget, not a goal. Padding it with "
-        "just-in-case\ncontext burns tokens now and, on real models, buries the "
-        "signal and lowers\nquality (context rot). Retrieve and keep what THIS turn "
-        "needs — relevance beats\nvolume. The cheapest, fastest, most accurate token "
-        "is the one you didn't send."
+        "just-in-case\ncontext burns tokens now AND buries the signal — here the "
+        "distractor's name won.\nThat's context rot: more context making the answer "
+        "worse, not just costlier.\nRetrieve and keep what THIS turn needs — relevance "
+        "beats volume. The cheapest,\nfastest, most accurate token is the one you "
+        "didn't send."
     )
 
 

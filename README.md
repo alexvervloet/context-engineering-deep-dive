@@ -56,8 +56,10 @@ source .venv/bin/activate          # Windows: .venv\Scripts\activate
 # 2. Install dependencies (the default mock stack needs only python-dotenv)
 pip install -r requirements.txt
 
-# 3. Copy the env file — you do NOT need to add a key
+# 3. Copy the env file — the default runs keyless (no API key needed)
 cp .env.example .env
+#    (Real provider instead of the mock? Its key goes in your OS keychain,
+#     not .env — see ../SECRETS.md — then run scripts as `secrun python ...`.)
 
 # 4. Confirm everything is wired up (makes no API call, costs nothing)
 python check_setup.py
@@ -179,9 +181,13 @@ python examples/07_context_rot.py
 A big window is a budget, not a goal. Padding it "just in case" dilutes the signal,
 invites the model to latch onto an irrelevant passage, and bills you for every
 wasted token on every turn — "context rot." The example answers the same question
-with a lean context and a bloated one and shows the token blowup (here ~10×) for zero
-added value. Relevance beats volume; the cheapest, fastest, most accurate token is
-the one you didn't send.
+with a lean context and a bloated one where a plausible distractor names a
+*different* person — and the bloated window both costs ~10× the tokens **and returns
+the wrong name**. On the mock that flip is deterministic (it naively takes the last
+"my name is …" it sees — a crude stand-in for a real model's attention wandering to
+a distractor); add a key and a harder question to watch a subtler version on a real
+model. Relevance beats volume; the cheapest, fastest, most accurate token is the one
+you didn't send.
 
 ---
 
@@ -338,7 +344,7 @@ Run `python check_setup.py` first — it catches most problems. Then, by symptom
 | What you see | What it means / the fix |
 |--------------|-------------------------|
 | `ModuleNotFoundError: dotenv` | Dependencies aren't installed or the venv isn't active. `source .venv/bin/activate` then `pip install -r requirements.txt`. |
-| `PROVIDER=... needs ... in .env` | You switched to a real provider without a key. Set the key, or go back to `PROVIDER=mock` to run offline. |
+| `PROVIDER=... needs ... in the environment` | You switched to a real provider without a key. Load it from your keychain with `secrun` (see [SECRETS.md](../SECRETS.md)), or go back to `PROVIDER=mock`. |
 | The capstone "remembers" things from a previous run | That's long-term memory working — it persists to `.ctx_memory.json`. Run `python hands_on/chat.py --forget` to wipe it. |
 | On a real provider, recall is fuzzier than the mock | The mock is deterministic; real models paraphrase and occasionally miss. That's why §8 (don't overload) and the Evals dive matter. |
 | The summary dropped a fact I needed | Compaction is lossy — that's the tradeoff. Keep more recent turns verbatim (`keep_recent`) or store the fact in long-term memory. |

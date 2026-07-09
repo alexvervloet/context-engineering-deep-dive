@@ -31,6 +31,7 @@ from __future__ import annotations
 
 import os
 import re
+import sys
 from functools import lru_cache
 
 _OPENAI_CHAT = "gpt-4o-mini"
@@ -44,9 +45,50 @@ _KEYS = {
 }
 
 
-def provider_name() -> str:
-    """The active stack: 'mock' (default), 'openai', or 'claude'."""
+def _configured_provider() -> str:
+    """What .env / the environment *asked* for, verbatim (before any fallback)."""
     return os.getenv("PROVIDER", "mock").strip().lower()
+
+
+def _has_required_keys(p: str) -> bool:
+    return all(os.getenv(k) for k in _KEYS.get(p, []))
+
+
+_warned_fallback = False
+
+
+def _warn_mock_fallback(p: str) -> None:
+    """Announce — loudly, but only once — that we degraded to the mock, and why."""
+    global _warned_fallback
+    if _warned_fallback:
+        return
+    _warned_fallback = True
+    missing = ", ".join(_KEYS.get(p, []))
+    print(
+        f"\n⚠  PROVIDER={p} is set, but {missing} isn't on the environment — did you\n"
+        f"   forget `secrun`? Falling back to the offline mock so this still runs.\n"
+        f"   Real model:  secrun python <script>   |   Hard error instead:  PROVIDER_STRICT=1\n",
+        file=sys.stderr,
+    )
+
+
+def provider_name() -> str:
+    """The active stack: 'mock' (default), 'openai', or 'claude'.
+
+    If a real provider is selected but its key isn't on the environment (the
+    classic "forgot `secrun`"), degrade to the offline mock — loudly, and only
+    once — so a demo keeps running instead of dying on a missing key. This is the
+    *opposite* of a silent fallback: a stderr banner and `describe()` both announce
+    it, so you can never mistake a keyless mock run for a real one. Set
+    PROVIDER_STRICT=1 to make the missing key a hard error instead (recommended for
+    CI and any real eval/cost run, where a silent mock would be dangerous)."""
+    p = _configured_provider()
+    if p in _KEYS and p != "mock" and not _has_required_keys(p):
+        if os.getenv("PROVIDER_STRICT"):
+            return p  # let ensure_ready()/the SDK raise the explicit missing-key error
+        _warn_mock_fallback(p)
+        return "mock"
+    return p
 
 
 def required_keys() -> list[str]:
@@ -54,7 +96,13 @@ def required_keys() -> list[str]:
 
 
 def describe() -> str:
+    configured = _configured_provider()
     p = provider_name()
+    if p == "mock" and configured != "mock":
+        return (
+            f"mock  (FALLBACK: PROVIDER={configured} is set but its key isn't on the "
+            f"environment — run under `secrun` for the real model)"
+        )
     if p == "mock":
         return f"mock  (offline, deterministic, model={_MOCK_MODEL}, no key)"
     if p == "openai":

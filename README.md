@@ -17,12 +17,12 @@ offline, for $0. Flip one env var and the same code runs against a real OpenAI o
 Claude model.
 
 This repo is **standalone**, but it's the missing half of "prompt engineering": if
-[Prompt Engineering](https://github.com/Ailuue/prompt-engineering-deep-dive) is
+[Prompt Engineering](https://github.com/alexvervloet/prompt-engineering-deep-dive) is
 *how you ask*, this is *what the model can see when you ask*. It extends the "memory
 is just the message list you resend" idea from the
-[API](https://github.com/Ailuue/openai-api-deep-dive) and
-[Agents](https://github.com/Ailuue/agents-deep-dive) dives, and its long-term memory
-is the [RAG](https://github.com/Ailuue/rag-deep-dive) pattern pointed at a
+[API](https://github.com/alexvervloet/openai-api-deep-dive) and
+[Agents](https://github.com/alexvervloet/agents-deep-dive) dives, and its long-term memory
+is the [RAG](https://github.com/alexvervloet/rag-deep-dive) pattern pointed at a
 conversation — but its code depends on none of them.
 
 Like its siblings, it's meant to be *walked through*. Each section ends with
@@ -267,7 +267,7 @@ You've built memory from scratch. The frontier is more of the same idea, at more
 scale and rigor:
 
 - **Real embeddings for long-term memory** — swap the keyword overlap for the vector
-  store from the [RAG dive](https://github.com/Ailuue/rag-deep-dive), so recall is by
+  store from the [RAG dive](https://github.com/alexvervloet/rag-deep-dive), so recall is by
   meaning, not shared words.
 - **Smarter compaction** — summarize hierarchically, or keep structured state (a
   running JSON of facts/decisions) alongside the prose summary.
@@ -276,7 +276,7 @@ scale and rigor:
 - **Eviction & freshness** — expire stale facts, resolve contradictions ("I moved to
   the Team plan"), and rank memory by recency *and* relevance.
 - **Measure it** — score whether compaction preserved the facts that mattered with
-  the [Evals dive](https://github.com/Ailuue/evals-deep-dive): a memory bug is a
+  the [Evals dive](https://github.com/alexvervloet/evals-deep-dive): a memory bug is a
   silent quality regression.
 - **Multi-agent context isolation** — give sub-agents their own focused windows so one
   agent's clutter never pollutes another's.
@@ -301,7 +301,7 @@ live path:
 
 The general ops machinery — observability, cost, reliability, caching, guardrails,
 prompt versioning, eval gates — is built from scratch and wired into one running app
-in **[Production](https://github.com/Ailuue/ai-in-production-deep-dive)** (#8 in the
+in **[Production](https://github.com/alexvervloet/ai-in-production-deep-dive)** (#8 in the
 series), which also runs offline on a mock provider.
 
 ---
@@ -358,33 +358,34 @@ the dive.
 
 ## The series
 
-This is one of thirteen standalone, hands-on deep dives into building with LLM APIs — eight core, plus five bonus dives.
+This is one of sixteen standalone, hands-on deep dives into building with LLM APIs — eight core, plus eight bonus dives.
 Each one stands on its own — its own setup, examples, and capstone — and they all
 share the same house style: provider-agnostic, built from scratch (no frameworks),
 offline-first examples, and a real capstone. Do them in any order; this sequence
 builds naturally:
 
-1. [OpenAI API](https://github.com/Ailuue/openai-api-deep-dive) — the API from zero
-2. [Claude API](https://github.com/Ailuue/claude-api-deep-dive) — the same ideas, the Anthropic way
-3. [Prompt Engineering](https://github.com/Ailuue/prompt-engineering-deep-dive) — shape model behavior with better prompts
-4. [RAG](https://github.com/Ailuue/rag-deep-dive) — answer questions over your own documents
-5. [Evals](https://github.com/Ailuue/evals-deep-dive) — measure whether a change actually helps
-6. [Agents](https://github.com/Ailuue/agents-deep-dive) — give a model tools and a loop so it can act
-7. [Prompt Injection & Guardrails](https://github.com/Ailuue/prompt-injection-deep-dive) — attack and defend all of the above
-8. [Production](https://github.com/Ailuue/ai-in-production-deep-dive) — operate one app end to end
+1. [OpenAI API](https://github.com/alexvervloet/openai-api-deep-dive) — the API from zero
+2. [Claude API](https://github.com/alexvervloet/claude-api-deep-dive) — the same ideas, the Anthropic way
+3. [Prompt Engineering](https://github.com/alexvervloet/prompt-engineering-deep-dive) — shape model behavior with better prompts
+4. [RAG](https://github.com/alexvervloet/rag-deep-dive) — answer questions over your own documents
+5. [Evals](https://github.com/alexvervloet/evals-deep-dive) — measure whether a change actually helps
+6. [Agents](https://github.com/alexvervloet/agents-deep-dive) — give a model tools and a loop so it can act
+7. [Prompt Injection & Guardrails](https://github.com/alexvervloet/prompt-injection-deep-dive) — attack and defend all of the above
+8. [Production](https://github.com/alexvervloet/ai-in-production-deep-dive) — operate one app end to end
 
 **Bonus dives** — standalone, slotting in where they're most useful:
 
-- [Context Engineering](https://github.com/Ailuue/context-engineering-deep-dive) — manage what's in the window: memory, compaction, assembly
-- [Multimodal](https://github.com/Ailuue/multimodal-deep-dive) — images & audio, not just text
-- [Fine-tuning](https://github.com/Ailuue/fine-tuning-deep-dive) — teach a model new behavior by example
-- [MCP](https://github.com/Ailuue/mcp-deep-dive) — serve tools, data & prompts to any LLM over a standard protocol
-- [Local Models](https://github.com/Ailuue/local-models-deep-dive) — run open-weight models on your own machine
-- [Agent Harnesses](https://github.com/Ailuue/agent-harness-deep-dive) — build on the loop: hooks, permissions, sandboxing, subagents
-- [Realtime Voice](https://github.com/Ailuue/realtime-voice-deep-dive) — low-latency speech-to-speech agents
+- [Context Engineering](https://github.com/alexvervloet/context-engineering-deep-dive) — manage what's in the window: memory, compaction, assembly
+- [Multimodal](https://github.com/alexvervloet/multimodal-deep-dive) — images & audio, not just text
+- [Fine-tuning](https://github.com/alexvervloet/fine-tuning-deep-dive) — teach a model new behavior by example
+- [MCP](https://github.com/alexvervloet/mcp-deep-dive) — serve tools, data & prompts to any LLM over a standard protocol
+- [Local Models](https://github.com/alexvervloet/local-models-deep-dive) — run open-weight models on your own machine
+- [Agent Harnesses](https://github.com/alexvervloet/agent-harness-deep-dive) — build on the loop: hooks, permissions, sandboxing, subagents
+- [Realtime Voice](https://github.com/alexvervloet/realtime-voice-deep-dive) — low-latency speech-to-speech agents
+- [Observability](https://github.com/alexvervloet/observability-deep-dive) — watch a running app over time: drift, quality, alerting, the flywheel
 
 **Context Engineering is a bonus dive in the series.** It slots most naturally after
-[Agents](https://github.com/Ailuue/agents-deep-dive) (#6) — whose stateless "resend
+[Agents](https://github.com/alexvervloet/agents-deep-dive) (#6) — whose stateless "resend
 the message list" memory it extends into compaction and long-term recall — and pairs
-with [RAG](https://github.com/Ailuue/rag-deep-dive) (#4), which its long-term memory
+with [RAG](https://github.com/alexvervloet/rag-deep-dive) (#4), which its long-term memory
 reuses.

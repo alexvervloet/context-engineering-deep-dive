@@ -1,6 +1,5 @@
 """
-context/cost.py — a tiny prompt-cache cost model (offline, deterministic).
-==========================================================================
+context/cost.py: a tiny prompt-cache cost model (offline, deterministic).
 
 Every other file here asks "what goes in the window?" This one asks the question
 that decides your bill: **what does re-sending that window actually cost?**
@@ -17,17 +16,17 @@ on, every segment is processed fresh and written to the cache. Cached ("read")
 tokens are cheap; freshly written tokens carry a premium. We model that with the
 published multipliers:
 
-    cache READ  ≈ 0.1×  base input price   (a hit — nearly free)
-    cache WRITE ≈ 1.25× base input price   (a miss — you pay to store it)
+    cache READ  ≈ 0.1×  base input price   (a hit, nearly free)
+    cache WRITE ≈ 1.25× base input price   (a miss: you pay to store it)
     uncached    = 1.0×                     (no caching at all)
 
-Everything here is deterministic and offline — we bill in "cost units" (tokens ×
+Everything here is deterministic and offline. We bill in "cost units" (tokens ×
 multiplier), not dollars, because the *ratio* is the lesson, not the sticker
 price. For a real bill, read `usage.cache_read_input_tokens` /
 `cache_creation_input_tokens` from the API response.
 
-The payoff (see examples/09): compaction and pruning *rewrite the prefix* — they
-change the system prompt (the summary) and drop old turns — so they blow the cache
+The payoff (see examples/09): compaction and pruning *rewrite the prefix*. They
+change the system prompt (the summary) and drop old turns, so they blow the cache
 that an append-only history would have kept warm. "Cheaper context" can mean a
 *bigger* bill.
 """

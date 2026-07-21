@@ -1,9 +1,8 @@
 """
-context/longterm.py — memory that outlives the window (and the session).
-========================================================================
+context/longterm.py: memory that outlives the window (and the session).
 
 A sliding window or a summary keeps a conversation afloat *within* one session.
-But some facts should survive forever — a user's name, their preferences, a
+But some facts should survive forever: a user's name, their preferences, a
 decision made last week. You can't hold those in the window indefinitely, and you
 shouldn't try. The pattern is **long-term memory**: write durable facts to a store
 outside the window, and *retrieve* the relevant few back into the window when a new
@@ -12,10 +11,10 @@ turn needs them.
 That's RAG (from the RAG deep dive) pointed at the conversation instead of a
 document corpus: store facts, embed/index them, retrieve the closest to the current
 query. To stay from-scratch and dependency-free we use a tiny bag-of-words overlap
-score instead of real embeddings — enough to show the *architecture*. Swap in real
+score instead of real embeddings, enough to show the *architecture*. Swap in real
 embeddings from the RAG dive and the shape is identical.
 
-The store persists to a JSON file, so it survives across runs — which is exactly
+The store persists to a JSON file, so it survives across runs, which is exactly
 what lets the capstone greet you by name in a brand-new session.
 """
 

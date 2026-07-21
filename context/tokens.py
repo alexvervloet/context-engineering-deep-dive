@@ -1,14 +1,13 @@
 """
-context/tokens.py — a budget you can do in your head.
-=====================================================
+context/tokens.py: a budget you can do in your head.
 
 Context engineering starts with arithmetic: *will this fit?* Every model has a
-context window — a hard cap on how many tokens (input + output) it can consider at
+context window: a hard cap on how many tokens (input + output) it can consider at
 once. Overflow it and the request fails; crowd it and quality drops and cost
 climbs. So before you decide what to keep, you need a rough token count.
 
-We estimate with a simple, provider-neutral rule — **~4 characters per token** for
-English — plus a small per-message overhead the chat format adds. This is an
+We estimate with a simple, provider-neutral rule, **~4 characters per token** for
+English, plus a small per-message overhead the chat format adds. This is an
 *approximation* on purpose: it needs no key, no network, and no tokenizer
 download, and it's accurate enough to reason about budgets. For a real bill, trust
 the `usage` field the API returns (the OpenAI/Claude dives show this). For

@@ -1,10 +1,9 @@
 """
-context/providers.py — the ONLY file that talks to a model provider.
-====================================================================
+context/providers.py: the ONLY file that talks to a model provider.
 
 Same keystone idea as every sibling repo: hide the provider-specific calls behind
 tiny functions so the rest of the code is provider-agnostic. This dive is about
-*what you put in the context window*, which is provider-neutral — so we expose two
+*what you put in the context window*, which is provider-neutral, so we expose two
 calls and nothing else:
 
   generate(system, messages) -> str   # answer a conversation
@@ -22,7 +21,7 @@ Why a mock is perfect *here*. The thesis of this dive is "the model only knows
 what's in the window right now." The mock proves it: it answers recall questions
 ("what's my name?") **only** from facts that are actually present in the messages
 you pass it. So when a fact falls out of a sliding window, the mock genuinely
-forgets it — and when compaction or long-term memory keeps it, the mock genuinely
+forgets it, and when compaction or long-term memory keeps it, the mock genuinely
 remembers. The lesson is visible offline, deterministically, for $0. (Real models
 behave the same way, just less predictably.)
 """
@@ -58,14 +57,14 @@ _warned_fallback = False
 
 
 def _warn_mock_fallback(p: str) -> None:
-    """Announce — loudly, but only once — that we degraded to the mock, and why."""
+    """Announce, loudly but only once, that we degraded to the mock, and why."""
     global _warned_fallback
     if _warned_fallback:
         return
     _warned_fallback = True
     missing = ", ".join(_KEYS.get(p, []))
     print(
-        f"\n⚠  PROVIDER={p} is set, but {missing} isn't on the environment — did you\n"
+        f"\n⚠  PROVIDER={p} is set, but {missing} isn't on the environment. Did you\n"
         f"   forget `secrun`? Falling back to the offline mock so this still runs.\n"
         f"   Real model:  secrun python <script>   |   Hard error instead:  PROVIDER_STRICT=1\n",
         file=sys.stderr,
@@ -76,8 +75,8 @@ def provider_name() -> str:
     """The active stack: 'mock' (default), 'openai', or 'claude'.
 
     If a real provider is selected but its key isn't on the environment (the
-    classic "forgot `secrun`"), degrade to the offline mock — loudly, and only
-    once — so a demo keeps running instead of dying on a missing key. This is the
+    classic "forgot `secrun`"), degrade to the offline mock, loudly and only
+    once, so a demo keeps running instead of dying on a missing key. This is the
     *opposite* of a silent fallback: a stderr banner and `describe()` both announce
     it, so you can never mistake a keyless mock run for a real one. Set
     PROVIDER_STRICT=1 to make the missing key a hard error instead (recommended for
@@ -101,7 +100,7 @@ def describe() -> str:
     if p == "mock" and configured != "mock":
         return (
             f"mock  (FALLBACK: PROVIDER={configured} is set but its key isn't on the "
-            f"environment — run under `secrun` for the real model)"
+            f"environment; run under `secrun` for the real model)"
         )
     if p == "mock":
         return f"mock  (offline, deterministic, model={_MOCK_MODEL}, no key)"
@@ -115,7 +114,7 @@ def describe() -> str:
 def ensure_ready() -> None:
     """Fail fast with a friendly message if the stack isn't configured.
 
-    For PROVIDER=mock this never fails — that's the point.
+    For PROVIDER=mock this never fails; that's the point.
     """
     import sys
 
@@ -132,12 +131,12 @@ def ensure_ready() -> None:
 
 
 # ---------------------------------------------------------------------------
-# The mock "model" — deterministic, offline, and it only knows what you show it.
+# The mock "model": deterministic, offline, and it only knows what you show it.
 # ---------------------------------------------------------------------------
 #
 # `_extract_facts` scans every message it's given for a few simple facts. It
 # recognizes both the *natural* way a user states them ("my name is Dana") and the
-# *canonical* way `summarize()` writes them ("name: Dana") — so a fact survives
+# *canonical* way `summarize()` writes them ("name: Dana"): so a fact survives
 # compaction: it's still readable after the raw turns are replaced by a summary.
 
 _FACT_PATTERNS = {
@@ -198,7 +197,7 @@ def _search_context(system: str, messages: list[dict], question: str) -> str | N
     """Mock 'retrieval': return the context line that best overlaps the question.
 
     This is what lets injected long-term memory or retrieved docs actually get
-    *used* by the mock — it answers from whatever text is in the window, exactly
+    *used* by the mock. It answers from whatever text is in the window, exactly
     like a grounded real model would."""
     qtokens = _significant(question)
     if not qtokens:
@@ -222,7 +221,7 @@ def _mock_generate(system: str, messages: list[dict]) -> str:
     facts = _extract_facts([{"role": "system", "content": system}, *messages])
     q = _last_user(messages).lower()
 
-    # Recall questions — answered ONLY from facts present in the window. A compound
+    # Recall questions, answered ONLY from facts present in the window. A compound
     # question ("my name and what I asked you to remember") gets each part answered.
     parts: list[str] = []
     recall_intent = False
@@ -247,7 +246,7 @@ def _mock_generate(system: str, messages: list[dict]) -> str:
 
     # No structured fact matched, but it's a recall question or any other question:
     # answer from whatever context is in the window (injected long-term memory,
-    # retrieved docs, earlier turns) — grounded, like a real model would.
+    # retrieved docs, earlier turns), grounded, like a real model would.
     if recall_intent or _looks_like_question(q):
         hit = _search_context(system, messages, _last_user(messages))
         if hit:
@@ -304,7 +303,7 @@ def _anthropic_client():
 def generate(system: str, messages: list[dict], *, max_tokens: int = 512) -> str:
     """Answer a conversation: a system prompt + a list of {role, content} messages.
 
-    The model only sees `messages` — which is the whole point of this dive. Trim
+    The model only sees `messages`, which is the whole point of this dive. Trim
     them and it forgets; summarize them and it remembers the summary.
     """
     ensure_ready()

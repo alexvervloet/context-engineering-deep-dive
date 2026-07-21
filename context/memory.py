@@ -1,9 +1,8 @@
 """
-context/memory.py — three ways to remember a conversation under a budget.
-=========================================================================
+context/memory.py: three ways to remember a conversation under a budget.
 
 The API is stateless: "memory" is just the message list you choose to resend each
-turn. But you can't resend *everything* forever — eventually the conversation
+turn. But you can't resend *everything* forever. Eventually the conversation
 won't fit the window (or you don't want to pay to send 50 turns every time). So
 "memory" is really a policy: **what do you keep, and what do you drop?** This file
 implements the three policies that matter, behind one interface:
@@ -11,12 +10,12 @@ implements the three policies that matter, behind one interface:
     mem.add(role, content)      # record a turn
     system, messages = mem.build()   # what to actually SEND this turn
 
-  - FullMemory     — keep every turn. Simple, correct, and unbounded — it works
+  - FullMemory     keep every turn. Simple, correct, and unbounded, so it works
                      until it doesn't fit (or gets expensive).
-  - WindowMemory   — keep the most recent turns that fit a token budget; the
+  - WindowMemory   keep the most recent turns that fit a token budget; the
                      oldest fall off. Bounded, but it genuinely *forgets* old
                      facts (the failure the other dives' "simple trim" has).
-  - SummaryMemory  — when the budget is exceeded, replace the oldest turns with a
+  - SummaryMemory  when the budget is exceeded, replace the oldest turns with a
                      running **summary** and keep the recent turns verbatim. Bounded
                      *and* it preserves old facts. This is "compaction."
 
@@ -51,7 +50,7 @@ class FullMemory:
 class WindowMemory:
     """Keep the most recent turns that fit `budget_tokens`; drop the oldest.
 
-    Bounded and cheap — but anything that scrolls off the window is *gone*. Use it
+    Bounded and cheap, but anything that scrolls off the window is *gone*. Use it
     when only recent context matters, or pair it with long-term memory for recall.
     """
 
@@ -91,7 +90,7 @@ class SummaryMemory:
 
     Keeps the most recent `keep_recent` turns verbatim and everything older as a
     compact summary in the system prompt. Bounded like a window, but old *facts*
-    survive — because they're carried in the summary, not the raw turns.
+    survive, because they're carried in the summary, not the raw turns.
     """
 
     def __init__(self, budget_tokens: int, system: str = "", *, keep_recent: int = 2, summarizer=_summarize):
@@ -121,7 +120,7 @@ class SummaryMemory:
         if tokens.fits(msgs, self.budget, system=system):
             return
         if len(self.turns) <= self.keep_recent:
-            return  # already minimal — can't shrink the recent window further
+            return  # already minimal; can't shrink the recent window further
         # Peel everything older than `keep_recent` and fold it into the summary.
         old = self.turns[: -self.keep_recent]
         self.turns = self.turns[-self.keep_recent :]

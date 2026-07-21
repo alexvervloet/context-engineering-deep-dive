@@ -1,10 +1,9 @@
 """
-Setup check — run this first.
-=============================
+Setup check: run this first.
 
     python check_setup.py
 
-Checks your Python version, the installed packages, and your chosen PROVIDER — and
+Checks your Python version, the installed packages, and your chosen PROVIDER, and
 tells you exactly what to fix. Makes NO API calls, so it costs nothing. Uses only
 the standard library, so it runs even before `pip install`.
 
@@ -75,7 +74,7 @@ def check_python():
     if (major, minor) >= (3, 10):
         ok(f"Python {major}.{minor} (3.10+ required)")
         return True
-    fail(f"Python {major}.{minor} — this repo needs Python 3.10 or newer.")
+    fail(f"Python {major}.{minor}: this repo needs Python 3.10 or newer.")
     print("    Install a newer Python from https://www.python.org/downloads/")
     return False
 
@@ -84,7 +83,7 @@ def check_provider(env):
     print("\nProvider")
     provider = (_get(env, "PROVIDER") or "mock").strip().lower()
     if provider in PROVIDER_DEPS:
-        suffix = "  (offline, no key — the default)" if provider == "mock" else ""
+        suffix = "  (offline, no key, the default)" if provider == "mock" else ""
         ok(f"PROVIDER = {provider}{suffix}")
         return provider
     fail(f"PROVIDER = {provider!r} is not recognized.")
@@ -99,9 +98,9 @@ def check_dependencies(provider):
     missing = []
     for import_name, pip_name, purpose in needed:
         if importlib.util.find_spec(import_name) is not None:
-            ok(f"{pip_name} — {purpose}")
+            ok(f"{pip_name}: {purpose}")
         else:
-            fail(f"{pip_name} MISSING — {purpose}")
+            fail(f"{pip_name} MISSING: {purpose}")
             missing.append(pip_name)
     if missing:
         print("\n    Install with:  pip install -r requirements.txt")
@@ -111,7 +110,7 @@ def check_dependencies(provider):
 def check_keys(env, provider):
     print("\nAPI key")
     if provider == "mock":
-        ok("PROVIDER=mock needs no key — everything runs offline.")
+        ok("PROVIDER=mock needs no key; everything runs offline.")
         return True
     if env is None:
         fail(".env file not found.")
@@ -122,7 +121,7 @@ def check_keys(env, provider):
         value = _get(env, name)
         if not value or value == placeholder:
             fail(f"{name} is not set.")
-            print("    Store it in your keychain + run under `secrun` (see SECRETS.md) — or set PROVIDER=mock to run offline.")
+            print("    Store it in your keychain + run under `secrun` (see SECRETS.md), or set PROVIDER=mock to run offline.")
             all_ok = False
         elif prefix and not value.startswith(prefix):
             warn(f"{name} is set but doesn't start with '{prefix}'. Double-check it.")
@@ -146,9 +145,9 @@ def main():
     if py and deps and keys:
         print(_c("All set! 🎉", "1;32"))
         print("Start here:  python examples/01_token_budget.py")
-        print("(Everything runs offline on PROVIDER=mock — no key, no cost.)")
+        print("(Everything runs offline on PROVIDER=mock: no key, no cost.)")
         return 0
-    print(_c("Not ready yet — fix the ✗ items above, then run this again.", "1;31"))
+    print(_c("Not ready yet. Fix the ✗ items above, then run this again.", "1;31"))
     print("(Tip: PROVIDER=mock runs the whole repo with no key.)")
     return 1
 

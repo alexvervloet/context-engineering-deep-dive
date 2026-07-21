@@ -1,7 +1,7 @@
 # The default mock stack runs the whole repo with ONLY this:
 python-dotenv>=1.0.0
 
-# Optional — only needed if you switch PROVIDER to a real model in .env.
+# Optional: only needed if you switch PROVIDER to a real model in .env.
 # Uncomment the one you want (or just `pip install -r requirements.txt` installs both).
 openai>=1.30.0
 anthropic>=0.40.0

@@ -1,6 +1,5 @@
 """
-Example 03 — compaction: summarize what falls off instead of deleting it.
-=========================================================================
+Example 03: compaction: summarize what falls off instead of deleting it.
 
 The sliding window (example 02) forgot Dana's name because it *deleted* old turns.
 Compaction keeps the same token budget but, when the window fills, replaces the
@@ -13,7 +12,7 @@ assistants do under the hood when a long chat "remembers" things from way back.
 into a summary (via `providers.summarize`) and carries that summary in the system
 prompt.
 
-We run the SAME long conversation as example 02, on the SAME budget — and this time
+We run the SAME long conversation as example 02, on the SAME budget, and this time
 the model recalls both the name and the thing it was asked to remember.
 
 Run:  python examples/03_compaction.py
@@ -60,10 +59,10 @@ def main() -> None:
     print("Answer:", answer)
 
     print(
-        "\nTakeaway: same budget as the sliding window, but the facts survived — "
+        "\nTakeaway: same budget as the sliding window, but the facts survived, "
         "because\ncompaction summarized the old turns instead of deleting them. You "
         "trade exact\nwording (and one summarization call) for durable memory under a "
-        "fixed budget.\nThe risk to watch: a bad summary drops a detail you needed — "
+        "fixed budget.\nThe risk to watch: a bad summary drops a detail you needed, "
         "so summarize for\n*facts to preserve*, and keep the most recent turns "
         "verbatim."
     )

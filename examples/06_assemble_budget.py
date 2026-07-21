@@ -1,14 +1,13 @@
 """
-Example 06 — assembling the window under a budget.
-==================================================
+Example 06: assembling the window under a budget.
 
 A real request's context isn't just the chat history. It's the system prompt, tool
-definitions, retrieved documents, long-term memory, AND the recent turns — all
+definitions, retrieved documents, long-term memory, AND the recent turns, all
 competing for the same token budget, and rarely all fitting. Context assembly is
 deciding, deliberately, what makes the cut.
 
 The rule: **prioritize, then pack.** Give each candidate section a priority, then
-keep the highest-priority sections that fit and drop the rest — so a giant
+keep the highest-priority sections that fit and drop the rest, so a giant
 low-priority document can't crowd out the system prompt and the user's actual
 question. `assemble()` does exactly that, offline, with no model.
 
@@ -44,7 +43,7 @@ def main() -> None:
     for s in sorted(CANDIDATES, key=lambda s: s.priority, reverse=True):
         print(f"  p{s.priority:<3} {tokens.estimate(s.text):>4} tok  {s.label}")
     total = sum(tokens.estimate(s.text) for s in CANDIDATES)
-    print(f"  {'':4} {total:>4} tok  TOTAL (vs {budget} budget — won't all fit)\n")
+    print(f"  {'':4} {total:>4} tok  TOTAL (vs {budget} budget; won't all fit)\n")
 
     result = assemble(CANDIDATES, budget_tokens=budget)
 
@@ -58,8 +57,8 @@ def main() -> None:
     print(
         "\nTakeaway: when context competes for space, the priority IS the design. "
         "The\nsystem prompt and the question are non-negotiable; a marketing blog is "
-        "the first\nthing to cut. Assembling the window on purpose — instead of "
-        "concatenating whatever\nyou have — is the difference between a focused "
+        "the first\nthing to cut. Assembling the window on purpose, instead of "
+        "concatenating whatever\nyou have, is the difference between a focused "
         "request and a bloated, costly one."
     )
 

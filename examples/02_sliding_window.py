@@ -1,18 +1,17 @@
 """
-Example 02 — the sliding window (and what it forgets).
-======================================================
+Example 02: the sliding window (and what it forgets).
 
 The simplest way to stay under budget: keep the system prompt plus the most recent
 turns that fit, and let the oldest scroll off. This is the "trim the history" move
-the API and Agents dives gestured at — here it's a real `WindowMemory` with a token
+the API and Agents dives gestured at. Here it's a real `WindowMemory` with a token
 budget.
 
-It's bounded and cheap. It's also genuinely forgetful: a fact stated early — your
-name, a decision, something you asked the model to remember — is *gone* once it
+It's bounded and cheap. It's also genuinely forgetful: a fact stated early (your
+name, a decision, something you asked the model to remember) is *gone* once it
 falls off the back. This example proves it. Dana introduces herself, the
 conversation runs long, and then we ask the model her name. On `PROVIDER=mock` the
 answer is deterministic, so you can see the forgetting plainly (real models behave
-the same — they can only answer from what's in the window).
+the same: they can only answer from what's in the window).
 
 Run:  python examples/02_sliding_window.py
 """
@@ -58,7 +57,7 @@ def main() -> None:
 
     print(
         "\nTakeaway: the sliding window kept costs bounded but threw away the "
-        "introduction,\nso the model can't recall it — for the model, the "
+        "introduction,\nso the model can't recall it. For the model, the "
         "conversation IS the window.\nNext example keeps the same budget but stops "
         "forgetting, by summarizing what\nfalls off instead of deleting it."
     )

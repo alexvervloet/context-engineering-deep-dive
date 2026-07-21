@@ -1,15 +1,14 @@
 """
-Example 05 — order matters: don't bury the lede in the middle.
-==============================================================
+Example 05: order matters: don't bury the lede in the middle.
 
 Fitting the right text in the window is half the job; *where* you put it is the
 other half. Models attend most reliably to the **start** and **end** of a long
-context and are measurably worse at using facts buried in the **middle** — the
+context and are measurably worse at using facts buried in the **middle**, the
 well-documented "lost in the middle" effect. So the naive move (concatenate your
 retrieved chunks in whatever order they came back) can hide the one chunk that
 matters in the worst possible spot.
 
-This example is offline — it's about *position*, not a model call. It takes a set of
+This example is offline; it's about *position*, not a model call. It takes a set of
 context sections of varying importance and shows two layouts: the naive order
 (important chunk lands in the middle) and `order_for_recall`, which places the
 highest-priority sections at the edges and buries the filler in the middle.
@@ -47,12 +46,12 @@ def show(title: str, sections: list[Section]) -> None:
 def main() -> None:
     print("A user asks about refunds. Five chunks were retrieved; one actually answers it.\n")
 
-    show("NAIVE order (as retrieved) — the key chunk sits in the middle:", SECTIONS)
-    show("order_for_recall — highest priority at the edges, filler in the middle:",
+    show("NAIVE order (as retrieved): the key chunk sits in the middle:", SECTIONS)
+    show("order_for_recall: highest priority at the edges, filler in the middle:",
          order_for_recall(SECTIONS))
 
     print(
-        "Takeaway: same chunks, same token cost — only the order changed. Put the "
+        "Takeaway: same chunks, same token cost; only the order changed. Put the "
         "material\nmost likely to be needed where the model reads best: the start and "
         "the end. When\nyou over-retrieve (RAG dive), ranking is also a *placement* "
         "decision, not just a\nkeep/drop one. (And the shorter you keep the context, "

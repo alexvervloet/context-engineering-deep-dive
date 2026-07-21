@@ -1,20 +1,19 @@
 """
-Example 04 — long-term memory: remembering across sessions.
-===========================================================
+Example 04: long-term memory: remembering across sessions.
 
 Compaction keeps a fact alive *within* a conversation. But close the session and
-start fresh tomorrow, and even a perfect summary is gone — it lived in that
+start fresh tomorrow, and even a perfect summary is gone; it lived in that
 conversation's window. Some facts should outlive any single chat: your name, your
 preferences, a decision from last week.
 
 The pattern is **long-term memory**: write durable facts to a store *outside* the
 window, and retrieve the relevant few back *into* the window when a new turn needs
-them. That's RAG pointed at the conversation — `LongTermMemory` persists facts to a
+them. That's RAG pointed at the conversation. `LongTermMemory` persists facts to a
 JSON file and retrieves by keyword overlap (swap in real embeddings from the RAG
 dive for production).
 
 This example runs TWO sessions against a fresh, empty window each time. Session one
-saves facts. Session two — brand new conversation, nothing in the window — answers a
+saves facts. Session two, a brand new conversation with nothing in the window, answers a
 question correctly *only because* it recalled the relevant fact from the store.
 
 Run:  python examples/04_long_term_memory.py
@@ -53,7 +52,7 @@ def main() -> None:
         store = LongTermMemory(path=os.path.join(tmp, "memory.json"))
 
         # --- Session one: learn durable facts and write them to the store. ---
-        print("SESSION 1 — the user tells us things worth keeping:")
+        print("SESSION 1: the user tells us things worth keeping:")
         for fact in [
             "The user's name is Dana.",
             "The user is on the Pro plan.",
@@ -70,7 +69,7 @@ def main() -> None:
 
         # --- Session two: a brand-new chat with an empty window. ---
         question = "When is my launch scheduled?"
-        print("SESSION 2 — a fresh conversation; the window starts empty.")
+        print("SESSION 2: a fresh conversation; the window starts empty.")
         print(f'Asked: "{question}"\n')
 
         without = session_two(reloaded, question, use_memory=False)
@@ -84,7 +83,7 @@ def main() -> None:
         "\nTakeaway: window memory and compaction are per-conversation; long-term "
         "memory\nis the store that outlives them. Write durable facts out, retrieve "
         "the relevant\nfew back in. The skill is choosing WHAT to persist (lasting "
-        "facts, not chit-chat)\nand retrieving only what THIS turn needs — putting "
+        "facts, not chit-chat)\nand retrieving only what THIS turn needs, putting "
         "the right text in the window."
     )
 

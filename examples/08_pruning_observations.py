@@ -1,15 +1,14 @@
 """
-Example 08 — pruning tool observations in an agent loop.
-========================================================
+Example 08: pruning tool observations in an agent loop.
 
 Agents (the Agents deep dive) bloat their own context faster than any chat: every
-step appends a tool call AND its full result, and tool results are often huge — a
+step appends a tool call AND its full result, and tool results are often huge: a
 whole file, a 50-row query, a web page. Ten steps in, the window is mostly stale
 observations the agent already used and will never need again. That's wasted budget
 on every remaining step, and prime material for context rot (example 07).
 
 The fix is **observation pruning**: keep the agent's reasoning and recent results
-verbatim, but compact or drop the *old* tool outputs — replace a spent 2,000-token
+verbatim, but compact or drop the *old* tool outputs: replace a spent 2,000-token
 result with a one-line note that it happened. The agent keeps its train of thought;
 the dead weight goes.
 
@@ -54,7 +53,7 @@ def build_pruned() -> list[dict]:
     obs_indices = [i for i, m in enumerate(msgs) if m["content"].startswith("Observation:")]
     to_stub = obs_indices[:-KEEP_RECENT] if KEEP_RECENT else obs_indices
     for i in to_stub:
-        msgs[i] = {"role": "user", "content": "Observation: [pruned — result used in an earlier step]"}
+        msgs[i] = {"role": "user", "content": "Observation: [pruned; result used in an earlier step]"}
     return msgs
 
 
@@ -72,13 +71,13 @@ def main() -> None:
     print("What the pruned window looks like:")
     for m in pruned:
         line = m["content"].replace("\n", " ")
-        print(f"  {m['role']:>9}: {line[:64]}{'…' if len(line) > 64 else ''}")
+        print(f"  {m['role']:>9}: {line[:64]}{'...' if len(line) > 64 else ''}")
 
     print(
         "\nTakeaway: in a loop, old tool results are the biggest, deadest weight in "
         "the\nwindow. Keep the reasoning and the most recent observations; compact "
         "or drop the\nrest. (Pair it with compaction for the thoughts and long-term "
-        "memory for facts\nthat outlive the task — same toolkit, applied to an "
+        "memory for facts\nthat outlive the task: same toolkit, applied to an "
         "agent's context.)"
     )
 

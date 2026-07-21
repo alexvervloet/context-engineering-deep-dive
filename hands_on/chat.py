@@ -1,28 +1,27 @@
 """
-chat.py — the capstone: a chat that remembers, under a fixed budget.
-====================================================================
+chat.py: the capstone: a chat that remembers, under a fixed budget.
 
 Everything in this dive, assembled into one tool you'd actually use: a multi-turn
 chat assistant that stays inside a token budget no matter how long you talk, AND
 remembers durable facts across sessions. Three layers from the library, working
 together on every turn:
 
-  1. SummaryMemory   — the in-session window. When the budget fills, old turns are
+  1. SummaryMemory   the in-session window. When the budget fills, old turns are
                        compacted into a running summary; recent turns stay verbatim.
-  2. LongTermMemory  — a persistent fact store. Durable things you say ("my name is
+  2. LongTermMemory  a persistent fact store. Durable things you say ("my name is
                        Dana", "remember the launch is Friday") are written to disk
-                       and recalled in later turns — and later *sessions*.
-  3. assembled system — each turn, the system prompt = your persona + the running
+                       and recalled in later turns, and later *sessions*.
+  3. assembled system each turn: the system prompt = your persona + the running
                        summary + the long-term facts relevant to what you just asked.
 
 The payoff: chat for fifty turns and it never overflows; quit, come back tomorrow,
 and it still greets you by name.
 
-Run it (offline on PROVIDER=mock — no key, no cost):
+Run it (offline on PROVIDER=mock, no key, no cost):
 
     # one-shot:
     python hands_on/chat.py "Hi, my name is Dana. Remember our launch is Friday."
-    python hands_on/chat.py "When is my launch?"        # a *new* run — still knows
+    python hands_on/chat.py "When is my launch?"        # a *new* run, still knows
 
     # interactive REPL (type 'quit' to exit; '/context' and '/memory' to inspect):
     python hands_on/chat.py
@@ -34,7 +33,7 @@ Run it (offline on PROVIDER=mock — no key, no cost):
     python hands_on/chat.py --budget 200
     python hands_on/chat.py --forget
 
-Read the source: `respond()` is the whole turn — recall, assemble, generate,
+Read the source: `respond()` is the whole turn: recall, assemble, generate,
 persist. The library does the heavy lifting; this file just wires it to a CLI.
 """
 
@@ -164,7 +163,7 @@ def main() -> int:
             continue
         print(f"bot> {respond(store, mem, user_input, show=show)}\n")
 
-    print(f"\nGoodbye. {len(store.facts)} fact(s) saved for next time — try running me again.")
+    print(f"\nGoodbye. {len(store.facts)} fact(s) saved for next time. Try running me again.")
     return 0
 
 

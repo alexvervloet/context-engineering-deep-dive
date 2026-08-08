@@ -33,7 +33,7 @@ import re
 import sys
 from functools import lru_cache
 
-_OPENAI_CHAT = "gpt-4o-mini"
+_OPENAI_CHAT = "gpt-5.4-nano"
 _CLAUDE_CHAT = "claude-haiku-4-5"
 _MOCK_MODEL = "mock-1"
 
@@ -313,7 +313,7 @@ def generate(system: str, messages: list[dict], *, max_tokens: int = 512) -> str
     if p == "openai":
         resp = _openai_client().chat.completions.create(
             model=_OPENAI_CHAT,
-            max_tokens=max_tokens,
+            max_completion_tokens=max_tokens,
             messages=[{"role": "system", "content": system}, *messages],  # type: ignore[arg-type]
         )
         return resp.choices[0].message.content or ""

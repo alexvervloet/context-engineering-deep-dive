@@ -229,6 +229,29 @@ drop a detail, and recall can miss. That's exactly why memory quality is somethi
 **measure** (the Evals dive), not assume.
 </details>
 
+**Predict (§11, `10_server_side_compaction.py`).** The example insists you append
+`response.content` rather than the extracted `.text` when compaction is enabled.
+Suppose you ignore that and keep only the text. Predict when your app breaks, and
+why that timing makes the bug nasty.
+
+<details><summary>▸ Answer</summary>
+
+It works perfectly until the conversation approaches the trigger threshold, which
+by default is around 150K tokens. Up to that point the API returns no `compaction`
+block, so keeping only the text loses nothing and every test passes. The first time
+a real compaction fires, the block carrying the compacted state is dropped on the
+floor, and the model loses the summarized history it was supposed to keep. So the
+bug ships green, hides through every short test conversation, and only appears in
+the long-running sessions you least want to debug. This is a good argument for
+testing against a deliberately enormous transcript rather than a realistic one.
+</details>
+
+**Do (§11).** Decide, for each of these, whether you would reach for compaction
+(summarize) or context editing (clear): a customer-support chat the user scrolls
+back through; an agent's forty `grep` results; a pair-programming session's file
+reads; a medical intake interview. Two of them are genuinely arguable. Say what
+extra fact would settle each.
+
 ---
 
 ### Where to take it next

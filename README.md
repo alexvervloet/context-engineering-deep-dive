@@ -228,7 +228,40 @@ bulk, paying the cache miss once, not every turn.)
 
 ---
 
-## 11. The capstone: `chat.py`
+## 11. When the API does it for you
+
+```bash
+secrun python examples/10_server_side_compaction.py
+```
+
+Everything above is hand-rolled on purpose: you cannot reason about a tradeoff
+you have never implemented. But two of these jobs now exist as server-side
+features on the Anthropic API, and knowing which is which saves you writing them
+twice.
+
+| Feature | What it does | Maps to | Model |
+|---------|--------------|---------|-------|
+| **Compaction** (`compact_20260112`) | **Summarizes** earlier turns near a threshold (150K default) | §4 | Sonnet/Opus 4.6+; Haiku 4.5 is a 400 |
+| **Context editing** (`clear_tool_uses_20250919`) | **Clears** old tool results outright, no summary | §9 | works on Haiku 4.5 |
+
+Summarize versus clear is the whole decision. A summary costs tokens to produce
+and keeps a lossy trace; clearing costs nothing and keeps nothing. For a chat
+transcript you usually want the summary, because the user will refer back to it.
+For the raw output of a `grep` forty agent steps ago, clearing is strictly
+better than paying a model to write a paragraph about it.
+
+Two things to carry away. First, a trap: with compaction on you must append
+`response.content` (the whole block list) to your history, not the extracted
+text, because the API returns a `compaction` block that carries the state. Code
+that keeps only `.text` works fine right up until the first real compaction, and
+then quietly loses it. Second, the part that has *not* changed: server-side
+compaction is still a prefix rewrite, so §10's cache arithmetic applies exactly
+as before. Moving the work to the server makes it easier to maintain, not free
+to run.
+
+---
+
+## 12. The capstone: `chat.py`
 
 Everything assembled into a chat you'd actually use: it stays inside a token budget
 no matter how long you talk (compaction), **and** remembers durable facts across
@@ -331,6 +364,7 @@ examples/
   07_context_rot.py         ← more context is not better
   08_pruning_observations.py← trim stale tool results in an agent loop (offline)
   09_caching_vs_compaction.py← compaction blows the prompt cache: fewer tokens, bigger bill (offline)
+  10_server_side_compaction.py ← the API's own compaction & context editing
 ```
 
 (`.ctx_memory.json` is created by the capstone's long-term memory and is git-ignored.)

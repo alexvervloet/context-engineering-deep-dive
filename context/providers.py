@@ -116,8 +116,6 @@ def ensure_ready() -> None:
 
     For PROVIDER=mock this never fails; that's the point.
     """
-    import sys
-
     p = provider_name()
     if p not in _KEYS:
         sys.exit(f"PROVIDER={p!r} is not recognized. Set PROVIDER=mock (default), openai, or claude in .env.")

@@ -31,12 +31,12 @@ TURNS = [
     ("assistant", "Welcome, Dana! On Pro you can invite teammates under Settings → Members → Invite. "
                   "Paste their emails and pick a role; they'll get a join link that expires in 7 days."),
     ("user", "Great. Can I set different permission levels for different people?"),
-    ("assistant", "Yes — each member gets a role: Admin (full access), Editor (create/edit), or "
+    ("assistant", "Yes, each member gets a role: Admin (full access), Editor (create/edit), or "
                   "Viewer (read-only). You can change a role anytime from the same Members page."),
     ("user", "What happens to their access if I downgrade back to Free later?"),
     ("assistant", "On Free you keep one project and a single seat, so extra members are set to "
                   "inactive (not deleted). Re-upgrade and they're restored exactly as they were."),
-    ("user", "Okay. Also, remember that our launch is on Friday — I'll need export working by then."),
+    ("user", "Okay. Also, remember that our launch is on Friday. I'll need export working by then."),
     ("assistant", "Noted: launch on Friday, export must work. Export lives under Settings → Data → "
                   "Export; it builds an archive and emails you a link, usually within the hour."),
 ]

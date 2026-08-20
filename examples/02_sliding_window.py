@@ -40,7 +40,7 @@ def main() -> None:
     # Then a long stretch of unrelated chatter that pushes turn 1 off the back.
     for i in range(6):
         mem.add("user", f"Walk me through feature number {i} in a fair amount of detail, please.")
-        mem.add("assistant", f"Sure — feature {i} works like this, with several steps and caveats "
+        mem.add("assistant", f"Sure, feature {i} works like this, with several steps and caveats "
                              f"that take a couple of sentences to lay out properly for you.")
 
     # Now ask something only turn 1 can answer.

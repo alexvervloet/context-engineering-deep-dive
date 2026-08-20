@@ -39,12 +39,12 @@ SYSTEM = "You are a helpful assistant. Answer using only what's in this conversa
 # A modest support conversation: a dozen exchanges, each a couple of sentences.
 TURNS = [
     ("user", "Hi, I'm Dana on the Pro plan. Remember our launch is Friday."),
-    ("assistant", "Welcome, Dana! Noted — launch Friday, Pro plan. How can I help?"),
+    ("assistant", "Welcome, Dana! Noted: launch Friday, Pro plan. How can I help?"),
     ("user", "Walk me through how billing proration works when I upgrade mid-cycle."),
     ("assistant", "Proration splits the cycle: you're credited for unused days on the "
                   "old plan and charged the prorated remainder on the new one."),
     ("user", "And if I downgrade instead, does the credit roll over to next month?"),
-    ("assistant", "Yes — a downgrade credit applies to the next invoice; it doesn't "
+    ("assistant", "Yes, a downgrade credit applies to the next invoice; it doesn't "
                   "expire at the cycle boundary the way a promo might."),
     ("user", "How do I export all my notes before the launch, just to be safe?"),
     ("assistant", "Settings → Data → Export produces a zip of every note as Markdown, "

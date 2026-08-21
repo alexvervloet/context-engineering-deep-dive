@@ -60,7 +60,7 @@ load_dotenv()
 if not os.getenv("ANTHROPIC_API_KEY"):
     sys.exit(
         "This example calls Anthropic directly (server-side features have no mock).\n"
-        "Set ANTHROPIC_API_KEY via secrun (see ../SECRETS.md) and try again.\n"
+        "Set ANTHROPIC_API_KEY via secrun (see ../docs/SECRETS.md) and try again.\n"
         "Every other example in this repo runs offline on PROVIDER=mock."
     )
 

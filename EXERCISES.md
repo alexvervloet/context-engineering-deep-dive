@@ -224,8 +224,8 @@ does the real model do *better* than the mock, and where might it do *worse*?
 <details><summary>▸ Answer</summary>
 
 Better: it summarizes prose far more intelligently and recalls paraphrased facts the
-mock's keyword match would miss. Worse: it's nondeterministic, and a summary can quietly
-drop a detail, and recall can miss. That's exactly why memory quality is something you
+mock's keyword match would miss. Worse: it's nondeterministic, and a summary can drop a
+detail with nothing to flag it, and recall can miss. That's exactly why memory quality is something you
 **measure** (the Evals dive), not assume.
 </details>
 

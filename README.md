@@ -1,48 +1,45 @@
 # Context Engineering: A Guided Deep Dive
 
-A hands-on playground for the skill the other dives keep bumping into: **managing
-what's in the context window.** A model only knows what you put in front of it
-*right now*, so as conversations get long, documents pile up, and agents loop, the
-real work becomes deciding what to keep, what to drop, what to summarize, and in
-what order. You'll build a token budgeter, three kinds of conversation memory, a
-persistent long-term store, and a context assembler from scratch, and watch a chat
-that *remembers* under a fixed budget.
+A hands-on playground for the skill the other dives keep bumping into: managing what is
+in the context window. A model only knows what you put in front of it right now, so as
+conversations get long, documents pile up, and agents loop, the real work becomes deciding
+what to keep, what to drop, what to summarize, and in what order. You'll build a token
+budgeter, three kinds of conversation memory, a persistent long-term store, and a context
+assembler from scratch, then watch a chat that remembers under a fixed budget.
 
-The twist that makes this repo work: it runs **completely offline on a mock
-provider**, with no API key. The mock is a deterministic "model" that answers recall
-questions **only** from facts actually present in the window, so when a fact falls
-off a sliding window the mock genuinely forgets it, and when compaction or long-term
-memory keeps it, the mock genuinely remembers. The whole thesis is *visible*,
-offline, for $0. Flip one env var and the same code runs against a real OpenAI or
-Claude model.
+Here is what makes this repo work. It runs completely offline on a mock provider, with no
+API key. The mock is a deterministic "model" that answers recall questions only from facts
+actually present in the window. So when a fact falls off a sliding window the mock
+genuinely forgets it, and when compaction or long-term memory keeps it, the mock genuinely
+remembers. The whole thesis is visible, offline, for $0. Flip one env var and the same
+code runs against a real OpenAI or Claude model.
 
-This repo is **standalone**, but it's the missing half of "prompt engineering": if
-[Prompt Engineering](https://github.com/alexvervloet/prompt-engineering-deep-dive) is
-*how you ask*, this is *what the model can see when you ask*. It extends the "memory
-is just the message list you resend" idea from the
+This repo is standalone, and it's also the missing half of prompt engineering. If
+[Prompt Engineering](https://github.com/alexvervloet/prompt-engineering-deep-dive) is how
+you ask, this is what the model can see when you ask. It extends the "memory is the
+message list you resend" idea from the
 [API](https://github.com/alexvervloet/openai-api-deep-dive) and
 [Agents](https://github.com/alexvervloet/agents-deep-dive) dives, and its long-term memory
 is the [RAG](https://github.com/alexvervloet/rag-deep-dive) pattern pointed at a
-conversation: but its code depends on none of them.
+conversation. Its code depends on none of them.
 
-Like its siblings, it's meant to be *walked through*. Each section ends with
-something to run, and **every section runs offline and free** on the mock.
-[EXERCISES.md](EXERCISES.md) has a predict-then-run prompt for each one.
+Like its siblings, walk through it. Each section ends with something to run, and every
+section runs offline and free on the mock. [EXERCISES.md](EXERCISES.md) has a
+predict-then-run prompt for each one.
 
 ---
 
 ## 0. The one big idea
 
-> **The model only knows what's in its context window right now. Context
-> engineering is deciding what goes in, in what order, and what to drop when it
-> won't all fit.**
+> **The model only knows what is in its context window right now. Context engineering is
+> deciding what goes in, in what order, and what to drop when it won't all fit.**
 
-That's the whole repo. "Memory" isn't a model feature. It's a *policy* you
-implement: resend the message list, but the list has a budget, so you choose what
-survives. Compaction summarizes what won't fit; long-term memory stores what should
-outlive the conversation; assembly decides which competing sources make the cut and
-where they sit. Every section is a variation on that one sentence. Hold onto it and
-none of this feels complicated.
+That is the whole repo. Memory is not a model feature. It is a policy you implement.
+Resend the message list, but the list has a budget, so you choose what survives.
+Compaction summarizes what won't fit. Long-term memory stores what should outlive the
+conversation. Assembly decides which competing sources make the cut and where they sit.
+Every section is a variation on that one sentence. Hold onto it and none of this feels
+complicated.
 
 ---
 
@@ -65,8 +62,8 @@ cp .env.example .env
 python check_setup.py
 ```
 
-That's it, and no key is required. The default `PROVIDER=mock` is a deterministic,
-in-process "model." Pick your stack with `PROVIDER` in `.env`:
+That's it, and no key is required. The default `PROVIDER=mock` is a deterministic
+in-process "model". Pick your stack with `PROVIDER` in `.env`.
 
 | `PROVIDER` | What runs the model | Keys needed | Cost |
 |------------|---------------------|-------------|------|
@@ -74,13 +71,14 @@ in-process "model." Pick your stack with `PROVIDER` in `.env`:
 | `openai` | OpenAI `gpt-5.4-nano` | `OPENAI_API_KEY` | tiny |
 | `claude` | Claude `claude-haiku-4-5` | `ANTHROPIC_API_KEY` | tiny |
 
-The only file that knows which you picked is [context/providers.py](context/providers.py).
-Everything else is provider-neutral logic about *what goes in the window*.
+The only file that knows which one you picked is
+[context/providers.py](context/providers.py). Everything else is provider-neutral logic
+about what goes in the window.
 
-> 💡 **Why a mock is the right call here.** The subject is the context window, not
-> the model. The mock answers recall questions only from what's actually in the
-> messages you pass it, so forgetting and remembering are *observable* offline and
-> deterministically. Real models behave the same way, just less predictably.
+> **Why a mock is the right call here.** The subject is the context window rather than the
+> model. The mock answers recall questions only from what is actually in the messages you
+> pass it, so forgetting and remembering are observable offline and deterministic. Real
+> models behave the same way, just less predictably.
 
 ---
 
@@ -90,25 +88,25 @@ Everything else is provider-neutral logic about *what goes in the window*.
 python examples/01_token_budget.py        # offline, no model needed
 ```
 
-Everything starts with arithmetic: the context window is a fixed number of tokens,
-and a conversation only grows. [context/tokens.py](context/tokens.py) estimates
-tokens with a simple ~4-chars/token heuristic (no tokenizer, no key), and this
-example grows a chat turn by turn until it overflows a deliberately tiny 2,000-token
-window. That overflow is the problem the rest of the repo solves.
+Everything starts with arithmetic. The context window is a fixed number of tokens, and a
+conversation only grows. [context/tokens.py](context/tokens.py) estimates tokens with a
+simple 4-characters-per-token heuristic, no tokenizer and no key, and this example grows a
+chat turn by turn until it overflows a deliberately tiny 2,000-token window. That overflow
+is the problem the rest of the repo solves.
 
 ---
 
-## 3. The sliding window: and what it forgets
+## 3. The sliding window, and what it forgets
 
 ```bash
 python examples/02_sliding_window.py
 ```
 
-The simplest fix for overflow: keep the system prompt plus the most recent turns
-that fit, and let the oldest scroll off. `WindowMemory` does it. It's bounded and
-cheap, and genuinely *forgetful*: Dana introduces herself, the chat runs long, and
-when you ask her name it's gone. That's the failure the "simple trim" in the other
-dives quietly has. **For the model, the conversation is the window.**
+The simplest fix for overflow is to keep the system prompt plus the most recent turns that
+fit, and let the oldest scroll off. `WindowMemory` does exactly that. It is bounded, cheap,
+and genuinely forgetful. Dana introduces herself, the chat runs long, and when you ask her
+name it's gone. That is the failure the "simple trim" in the other dives has and never
+mentions. For the model, the conversation is the window.
 
 ---
 
@@ -118,13 +116,12 @@ dives quietly has. **For the model, the conversation is the window.**
 python examples/03_compaction.py
 ```
 
-Same budget as §3, but instead of *deleting* old turns, `SummaryMemory` folds them
-into a running **summary** and keeps the recent turns verbatim. The exact words are
-gone; the *facts* survive. Run the same long conversation and this time the model
-recalls both the name and the thing it was asked to remember. This is the single
-most important technique here, and what real assistants do when a long chat
-"remembers." You trade exact wording (and one summarization call) for durable memory
-under a fixed budget.
+Same budget as §3, but instead of deleting old turns, `SummaryMemory` folds them into a
+running summary and keeps the recent turns verbatim. The exact words are gone. The facts
+survive. Run the same long conversation and this time the model recalls both the name and
+the thing it was asked to remember. This is the most important technique in the repo, and
+it is what real assistants do when a long chat remembers. You trade exact wording, plus
+one summarization call, for durable memory under a fixed budget.
 
 ---
 
@@ -134,27 +131,26 @@ under a fixed budget.
 python examples/04_long_term_memory.py
 ```
 
-Compaction keeps a fact alive *within* a conversation. Close the session and it's
-gone. Long-term memory writes durable facts to a store *outside* the window and
-retrieves the relevant few back *in* when a new turn needs them: RAG pointed at the
-conversation. [context/longterm.py](context/longterm.py) persists facts to JSON and
-retrieves by overlap (swap in real embeddings from the RAG dive for production). The
-example runs two sessions against a fresh, empty window: session two answers
-correctly *only because* it recalled a fact session one stored.
+Compaction keeps a fact alive within a conversation. Close the session and it's gone.
+Long-term memory writes durable facts to a store outside the window and retrieves the
+relevant few back in when a new turn needs them. RAG pointed at the conversation.
+[context/longterm.py](context/longterm.py) persists facts to JSON and retrieves by
+overlap; swap in real embeddings from the RAG dive for production. The example runs two
+sessions against a fresh, empty window, and session two answers correctly only because it
+recalled a fact session one stored.
 
 ---
 
-## 6. Order matters: don't bury the lede
+## 6. Order matters, so don't bury the lede
 
 ```bash
 python examples/05_ordering.py        # offline
 ```
 
-Fitting the right text is half the job; *where* you put it is the other half. Models
-attend most reliably to the **start** and **end** of a long context and can miss
-what's buried in the **middle** (the "lost in the middle" effect). `order_for_recall`
-places the highest-priority sections at the edges and the filler in the middle: same
-tokens, better recall.
+Fitting the right text is half the job. Where you put it is the other half. Models attend
+most reliably to the start and the end of a long context and can miss what's buried in the
+middle, the "lost in the middle" effect. `order_for_recall` places the highest-priority
+sections at the edges and the filler in the middle. Same tokens, better recall.
 
 ---
 
@@ -164,10 +160,10 @@ tokens, better recall.
 python examples/06_assemble_budget.py        # offline
 ```
 
-A real request's context competes for space: system prompt, tools, retrieved docs,
-long-term memory, recent turns, and they rarely all fit. `assemble()` prioritizes,
-then packs: keep the highest-priority sections that fit, drop the rest, so a
-marketing blog can't crowd out the user's actual question. Assembling the window on
+A real request's context competes for space between the system prompt, tools, retrieved
+docs, long-term memory, and recent turns, and they rarely all fit. `assemble()`
+prioritizes, then packs. Keep the highest-priority sections that fit and drop the rest, so
+a marketing blog can't crowd out the user's actual question. Assembling the window on
 purpose is the difference between a focused request and a bloated one.
 
 ---
@@ -178,16 +174,15 @@ purpose is the difference between a focused request and a bloated one.
 python examples/07_context_rot.py
 ```
 
-A big window is a budget, not a goal. Padding it "just in case" dilutes the signal,
-invites the model to latch onto an irrelevant passage, and bills you for every
-wasted token on every turn: "context rot." The example answers the same question
-with a lean context and a bloated one where a plausible distractor names a
-*different* person, and the bloated window both costs ~10× the tokens **and returns
-the wrong name**. On the mock that flip is deterministic (it naively takes the last
-"my name is ..." it sees, a crude stand-in for a real model's attention wandering to
-a distractor); add a key and a harder question to watch a subtler version on a real
-model. Relevance beats volume; the cheapest, fastest, most accurate token is the one
-you didn't send.
+A big window is a budget rather than a goal. Padding it just in case dilutes the signal,
+invites the model to latch onto an irrelevant passage, and bills you for every wasted token
+on every turn. That is context rot. The example answers the same question with a lean
+context and with a bloated one where a plausible distractor names a different person, and
+the bloated window costs about 10× the tokens and returns the wrong name. On the mock that
+flip is deterministic, since it naively takes the last "my name is ..." it sees, a crude
+stand-in for a real model's attention wandering to a distractor. Add a key and a harder
+question to watch a subtler version on a real model. Relevance beats volume, and the
+cheapest, fastest, most accurate token is the one you didn't send.
 
 ---
 
@@ -197,34 +192,32 @@ you didn't send.
 python examples/08_pruning_observations.py        # offline
 ```
 
-Agents bloat context fastest: every step appends a tool call *and* its full result,
-and tool results are huge. Ten steps in, the window is mostly stale observations the
-agent already used. Observation pruning keeps the reasoning and the most recent
-results verbatim and stubs the old ones: here a 75% smaller window with the agent's
-train of thought intact. It's compaction, long-term memory, and assembly applied to
-an agent's context.
+Agents bloat context fastest. Every step appends a tool call and its full result, and tool
+results are huge. Ten steps in, the window is mostly stale observations the agent already
+used. Observation pruning keeps the reasoning and the most recent results verbatim and
+stubs the old ones. Here that gives a 75% smaller window with the agent's train of thought
+intact. It's compaction, long-term memory, and assembly applied to an agent's context.
 
 ---
 
-## 10. The hidden cost: compaction breaks your prompt cache
+## 10. The hidden cost, where compaction breaks your prompt cache
 
 ```bash
 python examples/09_caching_vs_compaction.py        # offline
 ```
 
-Every technique so far shrinks the window. This one shows the bill they can quietly
-*raise*. Providers cache the prompt **prefix**, and the rule is unforgiving: any
-change anywhere in the prefix invalidates everything after it. An **append-only**
-history never touches its prefix, so every prior token is a cheap cache *read*
-(~0.1×) and only the new turn is written (~1.25×). **Compaction rewrites the
-prefix**: it changes the system prompt (the summary) and drops old turns, so the
-next request is a cache *miss* that pays full write price on the whole context.
-The example bills the same conversation both ways ([context/cost.py](context/cost.py))
-and finds compaction costing **~1.5×** as much here: fewer tokens, bigger bill.
-It's the honest tradeoff this series insists on: "cheaper context" and "cheaper
-bill" are different axes. (The crossover: on *very* long chats the unbounded
-append-only window finally loses, so when you must compact, do it rarely and in
-bulk, paying the cache miss once, not every turn.)
+Every technique so far shrinks the window. This one shows the bill they can raise instead.
+Providers cache the prompt prefix, and the rule is unforgiving. Any change anywhere in the
+prefix invalidates everything after it. An append-only history never touches its prefix, so
+every prior token is a cheap cache read at about 0.1× and only the new turn is written at
+about 1.25×. Compaction rewrites the prefix. It changes the system prompt, which is the
+summary, and drops old turns, so the next request is a cache miss that pays full write
+price on the whole context. The example bills the same conversation both ways in
+[context/cost.py](context/cost.py) and finds compaction costing about 1.5× as much here.
+Fewer tokens, bigger bill. That is the honest tradeoff this series insists on: cheaper
+context and cheaper bill are different axes. There is a crossover, though. On very long
+chats the unbounded append-only window finally loses, so when you have to compact, do it
+rarely and in bulk, paying the cache miss once instead of every turn.
 
 ---
 
@@ -234,39 +227,36 @@ bulk, paying the cache miss once, not every turn.)
 secrun python examples/10_server_side_compaction.py
 ```
 
-Everything above is hand-rolled on purpose: you cannot reason about a tradeoff
-you have never implemented. But two of these jobs now exist as server-side
-features on the Anthropic API, and knowing which is which saves you writing them
-twice.
+Everything above is hand-rolled on purpose, because you cannot reason about a tradeoff you
+have never implemented. But two of these jobs now exist as server-side features on the
+Anthropic API, and knowing which is which saves you writing them twice.
 
 | Feature | What it does | Maps to | Model |
 |---------|--------------|---------|-------|
 | **Compaction** (`compact_20260112`) | **Summarizes** earlier turns near a threshold (150K default) | §4 | Sonnet/Opus 4.6+; Haiku 4.5 is a 400 |
 | **Context editing** (`clear_tool_uses_20250919`) | **Clears** old tool results outright, no summary | §9 | works on Haiku 4.5 |
 
-Summarize versus clear is the whole decision. A summary costs tokens to produce
-and keeps a lossy trace; clearing costs nothing and keeps nothing. For a chat
-transcript you usually want the summary, because the user will refer back to it.
-For the raw output of a `grep` forty agent steps ago, clearing is strictly
-better than paying a model to write a paragraph about it.
+Summarize against clear is the whole decision. A summary costs tokens to produce and keeps
+a lossy trace. Clearing costs nothing and keeps nothing. For a chat transcript you usually
+want the summary, because the user will refer back to it. For the raw output of a `grep`
+forty agent steps ago, clearing beats paying a model to write a paragraph about it.
 
-Two things to carry away. First, a trap: with compaction on you must append
-`response.content` (the whole block list) to your history, not the extracted
-text, because the API returns a `compaction` block that carries the state. Code
-that keeps only `.text` works fine right up until the first real compaction, and
-then quietly loses it. Second, the part that has *not* changed: server-side
-compaction is still a prefix rewrite, so §10's cache arithmetic applies exactly
-as before. Moving the work to the server makes it easier to maintain, not free
-to run.
+Two things to carry away. First, a trap. With compaction on you have to append
+`response.content`, the whole block list, to your history rather than the extracted text,
+because the API returns a `compaction` block that carries the state. Code that keeps only
+`.text` works fine right up until the first real compaction, and then loses it with no
+warning. Second, what has not changed. Server-side compaction is still a prefix rewrite,
+so §10's cache arithmetic applies exactly as before. Moving the work to the server makes
+it easier to maintain, not free to run.
 
 ---
 
 ## 12. The capstone: `chat.py`
 
-Everything assembled into a chat you'd actually use: it stays inside a token budget
-no matter how long you talk (compaction), **and** remembers durable facts across
-sessions (long-term memory). Each turn, the system prompt is your persona + the
-running summary + the long-term facts relevant to what you just asked.
+Everything assembled into a chat you would actually use. It stays inside a token budget no
+matter how long you talk, through compaction, and it remembers durable facts across
+sessions, through long-term memory. Each turn, the system prompt is your persona, the
+running summary, and the long-term facts relevant to what you just asked.
 
 ```bash
 # State some facts (offline on the mock: no key, no cost):
@@ -285,41 +275,41 @@ python hands_on/chat.py --show-context --budget 200
 python hands_on/chat.py --forget
 ```
 
-Read [hands_on/chat.py](hands_on/chat.py): `respond()` is the whole turn: recall
-relevant facts, assemble the system prompt, generate, persist any new durable facts.
-The library does the work; the capstone just wires it to a CLI. **Suggested
-exercise:** chat for a dozen turns with `--show-context --budget 200` and watch the
-compaction count climb while the window stays under budget, then quit, run again,
-and notice it still greets you by name.
+Read [hands_on/chat.py](hands_on/chat.py). `respond()` is the whole turn: recall relevant
+facts, assemble the system prompt, generate, persist any new durable facts. The library
+does the work and the capstone wires it to a CLI. **Suggested exercise:** chat for a dozen
+turns with `--show-context --budget 200` and watch the compaction count climb while the
+window stays under budget. Then quit, run it again, and notice it still greets you by
+name.
 
 ---
 
 ## Where to go next
 
-You've built memory from scratch. The frontier is more of the same idea, at more
-scale and rigor:
+You've built memory from scratch. What comes next is more of the same idea, at more scale
+and more rigor.
 
-- **Real embeddings for long-term memory**: swap the keyword overlap for the vector
-  store from the [RAG dive](https://github.com/alexvervloet/rag-deep-dive), so recall is by
-  meaning, not shared words.
-- **Smarter compaction**: summarize hierarchically, or keep structured state (a
-  running JSON of facts/decisions) alongside the prose summary.
-- **Memory-as-a-tool**: let an agent *decide* what to remember and recall by calling
-  `remember()`/`recall()` tools, instead of doing it on every turn.
-- **Eviction & freshness**: expire stale facts, resolve contradictions ("I moved to
-  the Team plan"), and rank memory by recency *and* relevance.
-- **Measure it**: score whether compaction preserved the facts that mattered with
-  the [Evals dive](https://github.com/alexvervloet/evals-deep-dive): a memory bug is a
-  silent quality regression.
-- **Multi-agent context isolation**: give sub-agents their own focused windows so one
+- **Real embeddings for long-term memory.** Swap the keyword overlap for the vector store
+  from the [RAG dive](https://github.com/alexvervloet/rag-deep-dive), so recall works by
+  meaning rather than shared words.
+- **Smarter compaction.** Summarize hierarchically, or keep structured state, a running
+  JSON of facts and decisions, alongside the prose summary.
+- **Memory as a tool.** Let an agent decide what to remember and recall by calling
+  `remember()` and `recall()` tools, instead of doing it on every turn.
+- **Eviction and freshness.** Expire stale facts, resolve contradictions ("I moved to the
+  Team plan"), and rank memory by recency as well as relevance.
+- **Measure it.** Score whether compaction preserved the facts that mattered, using the
+  [Evals dive](https://github.com/alexvervloet/evals-deep-dive). A memory bug is a silent
+  quality regression.
+- **Multi-agent context isolation.** Give sub-agents their own focused windows so one
   agent's clutter never pollutes another's.
 
 ---
 
 ## From teaching code to production
 
-The teaching shortcuts here are exactly what you'd harden once a memory layer is on a
-live path:
+The teaching shortcuts here are exactly what you would harden once a memory layer sits on
+a live path.
 
 | This repo's teaching shortcut | In production |
 |-------------------------------|---------------|
@@ -328,14 +318,14 @@ live path:
 | Compaction summarizes inline, every overflow | Summarization wrapped in **retries + a cost budget** (it's an extra model call) |
 | Recall is keyword overlap | Embedding similarity + reranking, and a relevance threshold so junk isn't injected |
 | Facts are trusted and never expire | **Eviction, contradiction resolution, and provenance** on stored memory |
-| A summary might silently drop a needed fact | An **eval gate** on memory quality, so a compaction regression fails the build |
+| A summary might drop a needed fact with nothing to show for it | An **eval gate** on memory quality, so a compaction regression fails the build |
 | Compaction/pruning run on every overflow (§10) | **Cache-aware memory**: keep the prefix stable, compact rarely and in bulk, and watch `cache_read_input_tokens` vs `cache_creation_input_tokens` so shrinking the window doesn't grow the bill |
 | Stored memory is trusted text | **Guardrails**: memory is untrusted input and a classic indirect-injection vector |
 
-The general ops machinery (observability, cost, reliability, caching, guardrails,
-prompt versioning, eval gates) is built from scratch and wired into one running app
-in **[Production](https://github.com/alexvervloet/ai-in-production-deep-dive)** (#8 in the
-series), which also runs offline on a mock provider.
+The general ops machinery (observability, cost, reliability, caching, guardrails, prompt
+versioning, eval gates) gets built from scratch and wired into one running app in
+[Production](https://github.com/alexvervloet/ai-in-production-deep-dive), #8 in the series,
+which also runs offline on a mock provider.
 
 ---
 
@@ -409,20 +399,20 @@ builds naturally:
 
 **Bonus dives**, standalone and slotting in where they're most useful:
 
-- [Context Engineering](https://github.com/alexvervloet/context-engineering-deep-dive): manage what's in the window: memory, compaction, assembly
-- [AI Data Engineering](https://github.com/alexvervloet/ai-data-engineering-deep-dive): the corpus behind the index: versions, lineage, ACLs, deletes
-- [Multimodal](https://github.com/alexvervloet/multimodal-deep-dive): images & audio, not just text
+- [Context Engineering](https://github.com/alexvervloet/context-engineering-deep-dive): manage what's in the window, with memory, compaction, and assembly
+- [AI Data Engineering](https://github.com/alexvervloet/ai-data-engineering-deep-dive): the corpus behind the index, with versions, lineage, ACLs, and deletes
+- [Multimodal](https://github.com/alexvervloet/multimodal-deep-dive): images and audio as well as text
 - [Fine-tuning](https://github.com/alexvervloet/fine-tuning-deep-dive): teach a model new behavior by example
-- [MCP](https://github.com/alexvervloet/mcp-deep-dive): serve tools, data & prompts to any LLM over a standard protocol
+- [MCP](https://github.com/alexvervloet/mcp-deep-dive): serve tools, data, and prompts to any LLM over a standard protocol
 - [Local Models](https://github.com/alexvervloet/local-models-deep-dive): run open-weight models on your own machine
-- [Agent Harnesses](https://github.com/alexvervloet/agent-harness-deep-dive): build on the loop: hooks, permissions, sandboxing, subagents
+- [Agent Harnesses](https://github.com/alexvervloet/agent-harness-deep-dive): build on the loop, adding hooks, permissions, sandboxing, and subagents
 - [Realtime Voice](https://github.com/alexvervloet/realtime-voice-deep-dive): low-latency speech-to-speech agents
-- [Observability](https://github.com/alexvervloet/observability-deep-dive): watch a running app over time: drift, quality, alerting, the flywheel
+- [Observability](https://github.com/alexvervloet/observability-deep-dive): watch a running app over time, covering drift, quality, alerting, and the feedback loop
 - [Architecture](https://github.com/alexvervloet/architecture-deep-dive): the seams between the components, each decision measured rather than asserted
-- [GenAI Security](https://github.com/alexvervloet/genai-security-deep-dive): treat the model as an untrusted principal: identity, supply chain, isolation, budgets, release gates
+- [GenAI Security](https://github.com/alexvervloet/genai-security-deep-dive): treat the model as an untrusted principal, and put identity, supply chain, isolation, budgets, and release gates around it
 - [Inference Platform Engineering](https://github.com/alexvervloet/inference-platform-deep-dive): turn finite GPU memory and a request queue into latency, throughput, and a fleet size you can defend
-- [Testing & Delivery](https://github.com/alexvervloet/testing-and-delivery-deep-dive): decide whether a build has earned promotion: evidence, gates, staged rollout, rollback
-- [Professional Tools](https://github.com/alexvervloet/professional-tools-deep-dive): rebuild each from-scratch primitive with the tool professionals reach for, and measure both
+- [Testing & Delivery](https://github.com/alexvervloet/testing-and-delivery-deep-dive): decide whether a build is fit to promote, using evidence, gates, staged rollout, and rollback
+- [Professional Tools](https://github.com/alexvervloet/professional-tools-deep-dive): rebuild each hand-written piece with the tool professionals reach for, and measure both
 
 And the whole series lands in one codebase in the
 [capstone](https://github.com/alexvervloet/deep-dive-capstone): a codebase Q&A tool

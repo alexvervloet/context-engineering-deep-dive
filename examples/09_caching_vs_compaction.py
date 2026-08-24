@@ -2,9 +2,9 @@
 Example 09: the hidden cost of compaction: it blows your prompt cache.
 
 Every technique in this dive so far, compaction (§4), pruning (§9), and reordering
-(§6), makes the window *smaller*. This example shows the bill they can quietly
-*raise*, because they all break the one thing that makes re-sending a long history
-cheap: the **prompt cache**.
+(§6), makes the window *smaller*. This example shows the bill they can
+*raise* instead, because they all break the one thing that makes re-sending a
+long history cheap: the **prompt cache**.
 
 Providers cache the prompt *prefix*, and the rule is unforgiving: any change
 anywhere in the prefix invalidates everything after it. An **append-only** history

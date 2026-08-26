@@ -8,7 +8,7 @@ noise, the model latches onto a plausible-but-irrelevant passage, and you pay fo
 every wasted token on every turn. Practitioners call this "context rot": quality
 degrades as junk accumulates, even well under the token limit.
 
-This example shows BOTH halves of the cost. It answers the same question two ways 
+This example shows BOTH halves of the cost. It answers the same question two ways:
 a **lean** context with just the fact you need, and a **bloated** one padded with
 irrelevant "retrieved" documents, one of which is a plausible distractor naming a
 *different* person. You'll see the token blowup (the cheap, undeniable half) *and*

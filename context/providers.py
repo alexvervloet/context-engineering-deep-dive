@@ -134,7 +134,7 @@ def ensure_ready() -> None:
 #
 # `_extract_facts` scans every message it's given for a few simple facts. It
 # recognizes both the *natural* way a user states them ("my name is Dana") and the
-# *canonical* way `summarize()` writes them ("name: Dana"): so a fact survives
+# *canonical* way `summarize()` writes them ("name: Dana"), so a fact survives
 # compaction: it's still readable after the raw turns are replaced by a summary.
 
 _FACT_PATTERNS = {

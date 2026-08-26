@@ -34,7 +34,7 @@ Run it (offline on PROVIDER=mock, no key, no cost):
     python hands_on/chat.py --forget
 
 Read the source: `respond()` is the whole turn: recall, assemble, generate,
-persist. The library does the heavy lifting; this file just wires it to a CLI.
+persist. The library does the work; this file just wires it to a CLI.
 """
 
 import argparse

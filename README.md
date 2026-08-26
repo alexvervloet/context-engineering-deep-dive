@@ -262,7 +262,7 @@ running summary, and the long-term facts relevant to what you just asked.
 # State some facts (offline on the mock: no key, no cost):
 python hands_on/chat.py "Hi, my name is Dana. Remember our launch is Friday."
 
-# A BRAND-NEW run: and it still knows, because the fact was persisted:
+# A BRAND-NEW run, and it still knows, because the fact was persisted:
 python hands_on/chat.py "When is my launch?"
 
 # Interactive REPL ('/context' to watch the window, '/memory' to list stored facts):

@@ -7,7 +7,7 @@ oldest turns with a short running **summary** and keeps the recent turns verbati
 The raw words are gone; the *facts* survive in the summary.
 
 This is the single most important technique in the dive, and it's what real
-assistants do under the hood when a long chat "remembers" things from way back.
+assistants do internally when a long chat "remembers" things from way back.
 `SummaryMemory` does it: each time the budget is exceeded it folds the oldest turns
 into a summary (via `providers.summarize`) and carries that summary in the system
 prompt.

@@ -1,6 +1,6 @@
 # Exercises: make the learning stick
 
-Reading code teaches you less than *predicting* what it will do and then checking.
+Reading code teaches you less than *predicting* what it'll do and then checking.
 This file turns each section of the [README](README.md) into a few quick
 active-recall prompts.
 
@@ -99,7 +99,7 @@ system prompt, back in the window where the model can use it.
 
 ## Section 6: Order matters **(offline)**
 
-**Recall.** What is the "lost in the middle" effect, and what does `order_for_recall`
+**Recall.** What's the "lost in the middle" effect, and what does `order_for_recall`
 do about it?
 
 <details><summary>▸ Answer</summary>
@@ -246,7 +246,7 @@ the long-running sessions you least want to debug. This is a good argument for
 testing against a deliberately enormous transcript rather than a realistic one.
 </details>
 
-**Do (§11).** Decide, for each of these, whether you would reach for compaction
+**Do (§11).** Decide, for each of these, whether you'd reach for compaction
 (summarize) or context editing (clear): a customer-support chat the user scrolls
 back through; an agent's forty `grep` results; a pair-programming session's file
 reads; a medical intake interview. Two of them are genuinely arguable. Say what

@@ -1,13 +1,13 @@
 # Context Engineering: A Guided Deep Dive
 
-A hands-on playground for the skill the other dives keep bumping into: managing what is
+A hands-on playground for the skill the other dives keep bumping into: managing what's
 in the context window. A model only knows what you put in front of it right now, so as
 conversations get long, documents pile up, and agents loop, the real work becomes deciding
 what to keep, what to drop, what to summarize, and in what order. You'll build a token
 budgeter, three kinds of conversation memory, a persistent long-term store, and a context
 assembler from scratch, then watch a chat that remembers under a fixed budget.
 
-Here is what makes this repo work. It runs completely offline on a mock provider, with no
+Here's what makes this repo work. It runs completely offline on a mock provider, with no
 API key. The mock is a deterministic "model" that answers recall questions only from facts
 actually present in the window. So when a fact falls off a sliding window the mock
 genuinely forgets it, and when compaction or long-term memory keeps it, the mock genuinely
@@ -31,10 +31,10 @@ predict-then-run prompt for each one.
 
 ## 0. The one big idea
 
-> **The model only knows what is in its context window right now. Context engineering is
+> **The model only knows what's in its context window right now. Context engineering is
 > deciding what goes in, in what order, and what to drop when it won't all fit.**
 
-That is the whole repo. Memory is not a model feature. It is a policy you implement.
+That's the whole repo. Memory isn't a model feature. It's a policy you implement.
 Resend the message list, but the list has a budget, so you choose what survives.
 Compaction summarizes what won't fit. Long-term memory stores what should outlive the
 conversation. Assembly decides which competing sources make the cut and where they sit.
@@ -76,7 +76,7 @@ The only file that knows which one you picked is
 about what goes in the window.
 
 > **Why a mock is the right call here.** The subject is the context window rather than the
-> model. The mock answers recall questions only from what is actually in the messages you
+> model. The mock answers recall questions only from what's actually in the messages you
 > pass it, so forgetting and remembering are observable offline and deterministic. Real
 > models behave the same way, just less predictably.
 
@@ -103,9 +103,9 @@ python examples/02_sliding_window.py
 ```
 
 The simplest fix for overflow is to keep the system prompt plus the most recent turns that
-fit, and let the oldest scroll off. `WindowMemory` does exactly that. It is bounded, cheap,
+fit, and let the oldest scroll off. `WindowMemory` does exactly that. It's bounded, cheap,
 and genuinely forgetful. Dana introduces herself, the chat runs long, and when you ask her
-name it's gone. That is the failure the "simple trim" in the other dives has and never
+name it's gone. That's the failure the "simple trim" in the other dives has and never
 mentions. For the model, the conversation is the window.
 
 ---
@@ -120,7 +120,7 @@ Same budget as §3, but instead of deleting old turns, `SummaryMemory` folds the
 running summary and keeps the recent turns verbatim. The exact words are gone. The facts
 survive. Run the same long conversation and this time the model recalls both the name and
 the thing it was asked to remember. This is the most important technique in the repo, and
-it is what real assistants do when a long chat remembers. You trade exact wording, plus
+it's what real assistants do when a long chat remembers. You trade exact wording, plus
 one summarization call, for durable memory under a fixed budget.
 
 ---
@@ -168,7 +168,7 @@ purpose is the difference between a focused request and a bloated one.
 
 ---
 
-## 8. More context is not better (context rot)
+## 8. More context isn't better (context rot)
 
 ```bash
 python examples/07_context_rot.py
@@ -176,7 +176,7 @@ python examples/07_context_rot.py
 
 A big window is a budget rather than a goal. Padding it just in case dilutes the signal,
 invites the model to latch onto an irrelevant passage, and bills you for every wasted token
-on every turn. That is context rot. The example answers the same question with a lean
+on every turn. That's context rot. The example answers the same question with a lean
 context and with a bloated one where a plausible distractor names a different person, and
 the bloated window costs about 10× the tokens and returns the wrong name. On the mock that
 flip is deterministic, since it naively takes the last "my name is ..." it sees, a crude
@@ -214,8 +214,8 @@ about 1.25×. Compaction rewrites the prefix. It changes the system prompt, whic
 summary, and drops old turns, so the next request is a cache miss that pays full write
 price on the whole context. The example bills the same conversation both ways in
 [context/cost.py](context/cost.py) and finds compaction costing about 1.5× as much here.
-Fewer tokens, bigger bill. That is the honest tradeoff this series insists on: cheaper
-context and cheaper bill are different axes. There is a crossover, though. On very long
+Fewer tokens, bigger bill. That's the honest tradeoff this series insists on: cheaper
+context and cheaper bill are different axes. There's a crossover, though. On very long
 chats the unbounded append-only window finally loses, so when you have to compact, do it
 rarely and in bulk, paying the cache miss once instead of every turn.
 
@@ -227,8 +227,8 @@ rarely and in bulk, paying the cache miss once instead of every turn.
 secrun python examples/10_server_side_compaction.py
 ```
 
-Everything above is hand-rolled on purpose, because you cannot reason about a tradeoff you
-have never implemented. But two of these jobs now exist as server-side features on the
+Everything above is hand-rolled on purpose, because you can't reason about a tradeoff you've
+never implemented. But two of these jobs now exist as server-side features on the
 Anthropic API, and knowing which is which saves you writing them twice.
 
 | Feature | What it does | Maps to | Model |
@@ -245,7 +245,7 @@ Two things to carry away. First, a trap. With compaction on you have to append
 `response.content`, the whole block list, to your history rather than the extracted text,
 because the API returns a `compaction` block that carries the state. Code that keeps only
 `.text` works fine right up until the first real compaction, and then loses it with no
-warning. Second, what has not changed. Server-side compaction is still a prefix rewrite,
+warning. Second, what hasn't changed. Server-side compaction is still a prefix rewrite,
 so §10's cache arithmetic applies exactly as before. Moving the work to the server makes
 it easier to maintain, not free to run.
 
@@ -253,7 +253,7 @@ it easier to maintain, not free to run.
 
 ## 12. The capstone: `chat.py`
 
-Everything assembled into a chat you would actually use. It stays inside a token budget no
+Everything assembled into a chat you'd actually use. It stays inside a token budget no
 matter how long you talk, through compaction, and it remembers durable facts across
 sessions, through long-term memory. Each turn, the system prompt is your persona, the
 running summary, and the long-term facts relevant to what you just asked.
@@ -308,7 +308,7 @@ and more rigor.
 
 ## From teaching code to production
 
-The teaching shortcuts here are exactly what you would harden once a memory layer sits on
+The teaching shortcuts here are exactly what you'd harden once a memory layer sits on
 a live path.
 
 | This repo's teaching shortcut | In production |

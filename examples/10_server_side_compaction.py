@@ -68,7 +68,7 @@ import anthropic  # noqa: E402
 
 client = anthropic.Anthropic()
 
-COMPACTION_MODEL = "claude-sonnet-4-6"  # compaction needs 4.6+; Haiku 4.5 is a 400
+COMPACTION_MODEL = "claude-sonnet-5"    # compaction needs 4.6+; Haiku 4.5 is a 400
 EDITING_MODEL = "claude-haiku-4-5"      # context editing works on the cheap workhorse
 
 # --- 1. Context editing: clear old tool results ------------------------------

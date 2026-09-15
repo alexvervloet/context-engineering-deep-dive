@@ -3,5 +3,5 @@ python-dotenv>=1.0.0,<2
 
 # Optional: only needed if you switch PROVIDER to a real model in .env.
 # Uncomment the one you want (or just `pip install -r requirements.txt` installs both).
-openai>=2.0,<3
-anthropic>=0.111.0,<1
+openai>=3.0,<4
+anthropic>=1.0,<2

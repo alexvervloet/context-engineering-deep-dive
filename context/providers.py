@@ -33,7 +33,7 @@ import re
 import sys
 from functools import lru_cache
 
-_OPENAI_CHAT = "gpt-5.4-nano"
+_OPENAI_CHAT = "gpt-6-luna"
 _CLAUDE_CHAT = "claude-haiku-4-5"
 _MOCK_MODEL = "mock-1"
 
@@ -311,6 +311,10 @@ def generate(system: str, messages: list[dict], *, max_tokens: int = 512) -> str
     if p == "openai":
         resp = _openai_client().chat.completions.create(
             model=_OPENAI_CHAT,
+            # gpt-6-luna reasons by default, and hidden reasoning counts against
+            # the budgets these lessons measure. "none" keeps the numbers about
+            # the context, not the model's thinking.
+            reasoning_effort="none",
             max_completion_tokens=max_tokens,
             messages=[{"role": "system", "content": system}, *messages],  # type: ignore[arg-type]
         )

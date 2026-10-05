@@ -68,7 +68,7 @@ in-process "model". Pick your stack with `PROVIDER` in `.env`.
 | `PROVIDER` | What runs the model | Keys needed | Cost |
 |------------|---------------------|-------------|------|
 | `mock` (default) | a deterministic offline "model" | **none** | **$0** |
-| `openai` | OpenAI `gpt-5.4-nano` | `OPENAI_API_KEY` | tiny |
+| `openai` | OpenAI `gpt-6-luna` | `OPENAI_API_KEY` | tiny |
 | `claude` | Claude `claude-haiku-4-5` | `ANTHROPIC_API_KEY` | tiny |
 
 The only file that knows which one you picked is

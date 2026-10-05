@@ -26,7 +26,8 @@ _PER_MESSAGE_OVERHEAD = 4
 # MODELS.md in the series. The point is the *ratio* to your conversation, not the
 # exact figure.
 CONTEXT_WINDOWS = {
-    "gpt-5.4-nano": 128_000,
+    "gpt-6-luna": 1_050_000,
+    "gpt-5.4-nano": 400_000,
     "claude-haiku-4-5": 200_000,
     "small-demo": 2_000,  # a deliberately tiny window so examples overflow quickly
 }

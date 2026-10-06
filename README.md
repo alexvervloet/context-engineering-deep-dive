@@ -372,7 +372,7 @@ Run `python check_setup.py` first; it catches most problems. Then, by symptom:
 | The capstone "remembers" things from a previous run | That's long-term memory working; it persists to `.ctx_memory.json`. Run `python hands_on/chat.py --forget` to wipe it. |
 | On a real provider, recall is fuzzier than the mock | The mock is deterministic; real models paraphrase and occasionally miss. That's why §8 (don't overload) and the Evals dive matter. |
 | The summary dropped a fact I needed | Compaction is lossy; that's the tradeoff. Keep more recent turns verbatim (`keep_recent`) or store the fact in long-term memory. |
-| `SyntaxError` / odd type errors on startup | You're likely on Python 3.9 or older; this repo needs 3.10+. `check_setup.py` confirms your version. |
+| `SyntaxError` / odd type errors on startup | You're likely on Python 3.10 or older; this repo needs 3.11+. `check_setup.py` confirms your version. |
 
 Still stuck? Every file is small and self-contained. Open it, read the docstring at
 the top, and run it directly. [context/memory.py](context/memory.py) is the heart of

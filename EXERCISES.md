@@ -252,6 +252,23 @@ back through; an agent's forty `grep` results; a pair-programming session's file
 reads; a medical intake interview. Two of them are genuinely arguable. Say what
 extra fact would settle each.
 
+**Predict, then run (§10, `11_append_only_contract.py`).** A harness puts today's date
+in its system prompt and rebuilds that prompt on every request. It runs on Claude Opus
+5.5 with thinking on. The developer's key, from 2025, never sees an error. What do users
+with accounts created in October 2026 see, starting when, and what's the smallest change
+that fixes it?
+
+<details><summary>▸ Answer</summary>
+
+They get a 400 in any conversation still running at midnight, on its first request
+after the date in the system prompt changes: every thinking block already in that
+history was signed against the old prompt. A conversation that starts and ends on the
+same day never sees it, so it also passes any test that runs within one day. The developer's older account doesn't run the check unless it opts in, which is why
+their key stays green. The fix is to freeze `system` at session start and send the new
+date as an appended `role: "system"` message (or in the newest user turn). That also
+stops the date change from restarting the prompt cache every day, the cost from §10.
+</details>
+
 ---
 
 ### Where to take it next

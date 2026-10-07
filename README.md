@@ -219,6 +219,32 @@ context and cheaper bill are different axes. There's a crossover, though. On ver
 chats the unbounded append-only window finally loses, so when you have to compact, do it
 rarely and in bulk, paying the cache miss once instead of every turn.
 
+### On the newest Claude models, the rewrite can also be an error
+
+```bash
+python examples/11_append_only_contract.py           # offline simulation
+secrun python examples/11_append_only_contract.py --real   # the real check, about a cent
+```
+
+Claude Fable 5.1, Opus 5.5, and Sonnet 5.5 sign each thinking block with the exact prefix
+it was produced after: the system prompt, the tools, and every earlier message. Send the
+block back after editing any of those and it's invalid. Accounts created on or after
+2026-08-31 get a 400 by default ("the block is bound to a different conversation"). Older
+accounts get no error and the model still reads the block, so code can pass on your key
+and fail on your users'. The example measures it live: an append-only request is
+accepted, the same request with one sentence added to the system prompt is rejected, and
+`prefix_mismatch_behavior: "drop_block"` makes it go through by silently dropping the
+reasoning.
+
+The edits that break thinking are the edits that restart the cache, so the rule is the
+one this section already argued for on cost: freeze `system` and `tools` for the session
+and only append to `messages`. To change instructions mid-session, append a
+`role: "system"` message rather than editing `system`. When the history has to shrink,
+summarize the whole session into one new user message and send no earlier turns. That
+leaves no old thinking to check. The sliding window and the summary-in-the-system-prompt
+compaction from sections 3 and 4 both fail the check, and so would this dive's `chat.py`
+on those models. It runs on Haiku 4.5, which doesn't do this check.
+
 ---
 
 ## 11. When the API does it for you
@@ -355,6 +381,7 @@ examples/
   08_pruning_observations.py← trim stale tool results in an agent loop (offline)
   09_caching_vs_compaction.py← compaction blows the prompt cache: fewer tokens, bigger bill (offline)
   10_server_side_compaction.py ← the API's own compaction & context editing
+  11_append_only_contract.py   ← history edits that 400 on the newest Claude models (offline + --real)
 ```
 
 (`.ctx_memory.json` is created by the capstone's long-term memory and is git-ignored.)
